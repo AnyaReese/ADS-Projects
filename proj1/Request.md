@@ -15,7 +15,7 @@ You may download the functions for handling stop words and stemming from the Int
 **(4)** Run tests to show how the thresholds on query may affect the results.<br>运行测试以显示查询上的阈值如何影响结果。
 
 ## Grading Policy:
-Programming: Write the programs for word counting (1 pt.), index generation (5 pts.) and query processing (3 pts.) with sufficient comments.<br>编写字数统计（1 分）、索引生成（5 分）和查询处理（3 分）的程序，并附上足够的注释。
+Programming: Write the programs for** word counting** (1 pt.), **index generation** (5 pts.) and **query processing** (3 pts.) with sufficient comments.<br>编写字数统计（1 分）、索引生成（5 分）和查询处理（3 分）的程序，并附上足够的注释。
 
 Testing: Design tests for the correctness of the inverted index (2 pts.) and thresholding for query (2 pts.). Write analysis and comments (3 pts.). Bonus: What if you have 500 000 files and 400 000 000 distinct words? Will your program still work? (+2 pts.)<br>设计测试倒排索引的正确性（2 分）和查询阈值（2 分）。撰写分析和评论（3 分）。奖励：如果您有 500 000 个文件和 400 000 000 个不同的单词怎么办？您的程序还能正常工作吗？（+2 分）
 
