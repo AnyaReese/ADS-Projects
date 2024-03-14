@@ -87,11 +87,15 @@ def get_shakespeare_text(url):
     soup = BeautifulSoup(response.content, 'html.parser')
 
     # 假设文本被 <blockquote> 标签包围（需要根据实际网页结构调整）
-    text_block = soup.find('blockquote')
-    if text_block:
-        return text_block.get_text()
+    text_blocks = soup.find_all('blockquote')
+    if text_blocks:
+        text = ''
+        for block in text_blocks:
+            text += block.get_text() + '\n'  # 可以根据需要添加分隔符
+        return text.strip()  # 去除首尾的空白字符
     else:
-        return "Error: Text block not found"
+        return "Error: Text blocks not found"
+
 
 # Read the file
 def read_file(file_path):
@@ -142,9 +146,19 @@ def main():
     base_url = 'http://shakespeare.mit.edu/'
     works_links = get_all_links(base_url)
 
+    directory_name = 'shakespeare_works'
+    if not os.path.exists(directory_name):
+        os.makedirs(directory_name)
+
     for link in works_links:
         text = get_shakespeare_text(link)
         # print(text)  # 或者进行其他处理，比如保存到文件中
+        # 保存到文件中
+        file_name = link.split('/')[-1].replace(".html", '') + '.txt'
+        file_path = os.path.join(directory_name, file_name)
+        with open(file_path, 'w') as file:
+            file.write(text)
+
 
 if __name__ == '__main__':
     main()
