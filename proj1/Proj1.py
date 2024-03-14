@@ -35,7 +35,49 @@ nltk.download('stopwords')
 nltk.download('punkt')
 # Download the stopwords
 
-# TODO: 从网页获取多个莎士比亚文本
+
+def get_all_links(url): # DONE: 从网页获取多个莎士比亚文本
+    response = requests.get(url)
+    if response.status_code != 200:
+        return "Error: Failed to retrieve data"
+
+    soup = BeautifulSoup(response.content, 'html.parser')
+    links = soup.find_all('a')  # 假设所有的子目录都是通过<a>标签链接的
+
+    valid_doc_links = []
+    valid_scene_links = []
+
+    for link in links:
+        href = link.get('href')
+        if href and not href.startswith('http'):  # 排除外部链接
+            if href and href.endswith('VenusAndAdonis.html'):
+                valid_scene_links.append(url + href)
+            elif href and href.endswith('LoversComplaint.html'):
+                valid_scene_links.append(url + href)
+            elif href and href.endswith('RapeOfLucrece.html'):
+                valid_scene_links.append(url + href)
+            elif href and href.endswith('elegy.html'):
+                valid_scene_links.append(url + href)
+            else:
+                valid_doc_links.append(url + href)
+
+    for link in valid_doc_links:
+        sub_response = requests.get(link)
+        if response.status_code != 200:
+            return "Error: Failed to retrieve data"
+
+        sub_soup = BeautifulSoup(sub_response.content, 'html.parser')
+        sub_links = sub_soup.find_all('a')
+        for sub_link in sub_links:
+            href = sub_link.get('href')
+            if href and href.endswith('.html') and link.endswith('index.html'):
+                valid_scene_links.append(link.replace('index.html', href))
+            elif href and href.endswith('.html') and link.endswith('sonnets.html'):
+                valid_scene_links.append(link.replace('sonnets.html', href))
+
+    print(valid_scene_links)
+    return valid_scene_links
+
 def get_shakespeare_text(url):
     response = requests.get(url)
     if response.status_code != 200:
@@ -97,11 +139,12 @@ def search_word(word, inverted_index):
 
 def main():
     # 示例：获取《哈姆雷特》的文本（需要根据实际URL调整）
-    hamlet_text = get_shakespeare_text('http://shakespeare.mit.edu/')
+    base_url = 'http://shakespeare.mit.edu/'
+    works_links = get_all_links(base_url)
 
-    # 打印获取的文本开头部分
-    print(hamlet_text[:1000])
-
+    for link in works_links:
+        text = get_shakespeare_text(link)
+        # print(text)  # 或者进行其他处理，比如保存到文件中
 
 if __name__ == '__main__':
     main()
