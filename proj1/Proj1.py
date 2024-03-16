@@ -33,8 +33,8 @@ from collections import Counter
 from nltk.stem import PorterStemmer
 from nltk.stem import LancasterStemmer
 from nltk.stem import SnowballStemmer
-nltk.download('stopwords')
-nltk.download('punkt')
+# nltk.download('stopwords')
+# nltk.download('punkt')
 # Download the stopwords
 
 
@@ -99,35 +99,8 @@ def get_shakespeare_text(url): # DONE: 从网页获取莎士比亚文本
     else:
         return "Error: Text blocks not found"
 
-
-def word_count_and_stopwords_identification(text):
-    words = word_tokenize(text)
-
-    # 没用这个，自己根据出现频率判断停用词
-    stop_words = set(stopwords.words('english'))
-    punctuations = set(string.punctuation)
-    # filtered_words = [word.lower() for word in words if word.lower() not in stop_words]
-
-    filtered_words = [word.lower() for word in words]
-    word_counts = Counter(filtered_words)
-    noisy_words = set()
-    noisy_dic = {}
-    interesting_words = set()
-    interesting_dic = {}
-
-    for word, count in word_counts.items():
-        if count >= 100:  # stop words 的阈值
-            noisy_words.add(word)
-            noisy_dic[word] = count
-        else:
-            interesting_words.add(word)
-            interesting_dic[word] = count
-
-    return noisy_dic, interesting_dic
-
-
 def stage_texts():
-    # 示例：获取《哈姆雷特》的文本（需要根据实际URL调整）
+    # 获取文本（需要根据实际URL调整）
     base_url = 'http://shakespeare.mit.edu/'
     works_links = get_all_links(base_url)
 
@@ -156,16 +129,84 @@ def stage_texts():
     file_path = os.path.join(directory, '0_all_texts')
     with open(file_path, 'w') as file:
         file.write(all_texts)
+########################################################################################## ↑ 爬取 shakespeare 的内容
 
+def word_count_and_stopwords_identification(text):
+    words = word_tokenize(text)
+
+    # 没用这个，自己根据出现频率判断停用词
+    stop_words = set(stopwords.words('english'))
+    punctuations = set(string.punctuation)
+    # filtered_words = [word.lower() for word in words if word.lower() not in stop_words]
+
+    filtered_words = [word.lower() for word in words]
+    word_counts = Counter(filtered_words)
+    noisy_words = set()
+    noisy_dic = {}
+    interesting_words = set()
+    interesting_dic = {}
+
+    for word, count in word_counts.items():
+        if count >= 100:  # stop words 的阈值
+            noisy_words.add(word)
+            noisy_dic[word] = count
+        else:
+            interesting_words.add(word)
+            interesting_dic[word] = count
+
+    return noisy_dic, interesting_dic
+
+
+# stop_words = set(stopwords.words('english'))
+
+def build_inverted_index(folder_path,noisy_dic):
+    stemmer = PorterStemmer()
+    inverted_index = {}
+    for filename in os.listdir(folder_path):
+        if filename.endswith('.txt'):
+            file_path = os.path.join(folder_path, filename)
+            with open(file_path, 'r', encoding='utf-8') as file:
+                content = file.read().lower()
+                words = nltk.word_tokenize(content)
+                for word in words:
+                    if word not in noisy_dic:
+                        stemmed_word = stemmer.stem(word)
+                        if stemmed_word not in inverted_index:
+                            inverted_index[stemmed_word] = {filename}
+                        else:
+                            inverted_index[stemmed_word].add(filename)
+    return inverted_index
+
+def save_inverted_index(inverted_index, output_path):
+    with open(output_path, 'w', encoding='utf-8') as file:
+        for word, files in inverted_index.items():
+            file.write(f"{word}: {', '.join(sorted(files))}\n")
+
+
+########################################################################################## ↑ 构建倒排索引
+            
+
+
+
+########################################################################################## ↑ 搜索
 def main():
     # stage_texts()
 
     with open(os.path.join('shakespeare_works', '0_all_texts'), 'r') as file:
         all_texts = file.read()
 
+    print("accessing noisy dic...")
     # 获取停用词和词频，用字典存储，用于后续的词频统计
     noisy_dic, interesting_dic = word_count_and_stopwords_identification(all_texts)
-    print(noisy_dic)
+    with open('./noisy_dic.txt', 'w', encoding='utf-8') as file:
+        for word, count in noisy_dic.items():
+            file.write(f"{word}: {count}\n")
+
+    print("building inverted file index...")
+    folder_path = './shakespeare_works'  # 资料文件夹路径
+    output_path = './output.txt'  # 输出文件路径
+    inverted_index = build_inverted_index(folder_path,noisy_dic)
+    save_inverted_index(inverted_index, output_path)
 
 
 if __name__ == '__main__':
