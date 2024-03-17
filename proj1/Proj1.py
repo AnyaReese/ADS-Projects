@@ -206,12 +206,15 @@ def find_files_with_words(wordlist, inverted_index, noisy_dic):
     # 对两个单词进行词干提取
     cnt = 0
     pre_files_with_word = set()
+
     for word in wordlist:
-        # if word in noisy_dic:
-        #     continue
-        cnt += 1
         stemmed_word = stemmer.stem(word.lower())
+        # print(stemmed_word)
+        if stemmed_word in noisy_dic:
+            continue
+        cnt += 1
         files_with_word = inverted_index.get(stemmed_word, set())
+        if not files_with_word: continue
         if cnt > 1:
             union_file = files_with_word.intersection(pre_files_with_word)
         else:
@@ -241,7 +244,7 @@ def main():
     inverted_index = build_inverted_index(folder_path, noisy_dic)
     save_inverted_index(inverted_index, output_path)
     while(1):
-        sentence = input("请输入需要查询的内容，如果要退出查询请输入-1: ")
+        sentence = input("请输入需要查询的内容，如果要退出查询请输入-1:")
         input_words = sentence.lower().split()
         if input_words == "-1":
             break
