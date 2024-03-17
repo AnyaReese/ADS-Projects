@@ -201,12 +201,14 @@ def save_inverted_index(inverted_index, output_path):
 #     # 返回两个集合的交集
 #     return files_with_word1.intersection(files_with_word2)
 
-def find_files_with_words(wordlist, inverted_index):
+def find_files_with_words(wordlist, inverted_index, noisy_dic):
     stemmer = PorterStemmer()
     # 对两个单词进行词干提取
     cnt = 0
     pre_files_with_word = set()
     for word in wordlist:
+        # if word in noisy_dic:
+        #     continue
         cnt += 1
         stemmed_word = stemmer.stem(word.lower())
         files_with_word = inverted_index.get(stemmed_word, set())
@@ -215,7 +217,7 @@ def find_files_with_words(wordlist, inverted_index):
         else:
             union_file = files_with_word
         pre_files_with_word = union_file
-    return pre_files_with_word
+    return pre_files_with_word,cnt
 
 # --------------------------------------------------------------------------------------- ↑ 搜索
 
@@ -238,11 +240,21 @@ def main():
     output_path = './output.txt'  # 输出文件路径
     inverted_index = build_inverted_index(folder_path, noisy_dic)
     save_inverted_index(inverted_index, output_path)
-    input_words = input("请输入需要查询的单词，用空格分隔: ").lower().split()
-    book_name_list = find_files_with_words(input_words,inverted_index)
-    for book_name in book_name_list:
-        print(book_name)
+    while(1):
+        sentence = input("请输入需要查询的内容，如果要退出查询请输入-1: ")
+        input_words = sentence.lower().split()
+        if input_words == "-1":
+            break
+        book_name_list,whether_appear = find_files_with_words(input_words, inverted_index, noisy_dic)
+        if whether_appear == 0: print("nothing found,because your words is noisy_words!")
+        else:
+            for book_name in book_name_list:
+                bookname, act, scene, txt = book_name.split(".")
+                print("The sentence: \"", sentence, "\" comes from Scene ", scene, ", Act", act, "of ", bookname)
+
 
 
 if __name__ == '__main__':
     main()
+
+# it is the east and Juliet is the sun
