@@ -23,6 +23,8 @@
 import re
 import string
 import requests
+import itertools
+import numpy as np
 import socket
 from bs4 import BeautifulSoup
 import os
@@ -33,6 +35,8 @@ from collections import Counter
 from nltk.stem import PorterStemmer
 from nltk.stem import LancasterStemmer
 from nltk.stem import SnowballStemmer
+from collections import defaultdict
+
 
 # When first use, please uncomment next two line!!
 # nltk.download('stopwords')
@@ -195,54 +199,53 @@ def save_inverted_index(inverted_index, output_path):
 # --------------------------------------------------------------------------------------- ↑ 构建倒排索引
 
 
-from collections import defaultdict
+def calculate_the_min_var(data):
+    # 生成所有可能的数字组合
+    all_combinations = itertools.product(*(data[key] for key in sorted(data.keys())))
+
+    min_variance = float('inf')
+    min_combination = None
+
+    # 遍历所有组合以找到方差最小的组合
+    for combination in all_combinations:
+        variance = np.var(combination)
+        if variance < min_variance:
+            min_variance = variance
+            # min_combination = combination
+
+    return min_variance
+
 
 def find_word_intersection_and_positions(inverted_index, words):
     # 使用默认字典来存储每个文件及其对应的单词位置
     stemmer = PorterStemmer()
     file_word_positions = defaultdict(lambda: defaultdict(list))
     real_word_cnt = 0
+    min_comb = None
     # 对于查询中的每个单词
     for word in words:
         stemmed_word = stemmer.stem(word.lower())
         # 在倒排索引中查找单词
         if stemmed_word in inverted_index:
-            print(stemmed_word)
             real_word_cnt += 1
             # 遍历该单词出现的所有文件及位置
             for filename, position in inverted_index[stemmed_word]:
                 # 记录文件中单词的位置
                 file_word_positions[filename][stemmed_word].append(position)
-    print(file_word_positions.items())
+    # print(file_word_positions.items())
     # 筛选出同时包含所有单词的文件
-    # intersection_files = {
-    #     filename: positions for filename, positions in file_word_positions.items()
-    #     if len(positions) == real_word_cnt
-    # }
-    # return intersection_files
+    intersection_files = {
+        filename: positions for filename, positions in file_word_positions.items()
+        if len(positions) == real_word_cnt
+    }
+    min_var = 114514
+    for filename in intersection_files:
+        var = calculate_the_min_var(intersection_files[filename])
+        if min_var > var:
+            min_var = var
+            min_comb = filename
 
-
-
-# def find_files_with_words(wordlist, inverted_index, noisy_dic):
-#     stemmer = PorterStemmer()
-#     # 对两个单词进行词干提取
-#     documents_set = None
-#     for word in wordlist:
-#         stemmed_word = stemmer.stem(word.lower())
-#         # print(stemmed_word)
-#         if stemmed_word in noisy_dic:
-#             continue
-#
-#         files_with_word = set([filename for filename, _ in inverted_index.get(stemmed_word, [])])
-#         posit_with_word = set([position for _, position in inverted_index.get(stemmed_word, [])])
-#
-#         if not files_with_word: continue
-#         if documents_set is None:
-#             documents_set = files_with_word
-#         else:
-#             documents_set = documents_set.intersection(files_with_word)
-#
-#     return documents_set
+    return min_comb
 
 # --------------------------------------------------------------------------------------- ↑ 搜索
 
@@ -270,14 +273,14 @@ def main():
         input_words = sentence.lower().split()
         if input_words == ["-1"]:
             break
-        find_word_intersection_and_positions(inverted_index, input_words)
-        # book_name_list = find_files_with_words(input_words, inverted_index, noisy_dic)
-        # if book_name_list is None: print("nothing found,because your words is noisy_words!")
-        # else:
+        name = find_word_intersection_and_positions(inverted_index, input_words)
+        if name is None: print("nothing found,because your words is noisy_words!")
+        else:
+            book_name, act, scene, txt = name.split(".")
+            print("The sentence: \"", sentence, "\" probably comes from Scene ", scene, ", Act", act, "of ", book_name)
         #     for book_name in book_name_list:
         #         bookname, act, scene, txt = book_name.split(".")
         #         print("The sentence: \"", sentence, "\" comes from Scene ", scene, ", Act", act, "of ", bookname)
-
 
 
 if __name__ == '__main__':
