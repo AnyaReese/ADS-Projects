@@ -173,13 +173,14 @@ def build_inverted_index(folder_path, noisy_dic):
                 content = file.read().lower()
                 words = nltk.word_tokenize(content)
                 for position, word in enumerate(words):
-                    if word not in noisy_dic:
-                        stemmed_word = stemmer.stem(word)
+                    stemmed_word = stemmer.stem(word)
+                    if stemmed_word not in noisy_dic:
                         if stemmed_word not in inverted_index:
                             inverted_index[stemmed_word] = [(filename, position)]
                         else:
                             inverted_index[stemmed_word].append((filename, position))
-    return inverted_index
+    sorted_index = dict(sorted(inverted_index.items(), key=lambda x: len(x[1])))
+    return sorted_index
 
 
 def save_inverted_index(inverted_index, output_path):
