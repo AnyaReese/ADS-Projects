@@ -33,10 +33,11 @@ from collections import Counter
 from nltk.stem import PorterStemmer
 from nltk.stem import LancasterStemmer
 from nltk.stem import SnowballStemmer
+
+# When first use, please uncomment next two line!!
 # nltk.download('stopwords')
 # nltk.download('punkt')
 # Download the stopwords
-
 
 
 def get_all_links(url): # DONE: 从网页获取多个包含文本的链接
@@ -81,6 +82,7 @@ def get_all_links(url): # DONE: 从网页获取多个包含文本的链接
     print(valid_scene_links)
     return valid_scene_links
 
+
 def get_shakespeare_text(url): # DONE: 从网页获取莎士比亚文本
     response = requests.get(url)
     if response.status_code != 200:
@@ -98,6 +100,7 @@ def get_shakespeare_text(url): # DONE: 从网页获取莎士比亚文本
         return text.strip()  # 去除首尾的空白字符
     else:
         return "Error: Text blocks not found"
+
 
 def stage_texts():
     # 获取文本（需要根据实际URL调整）
@@ -129,7 +132,8 @@ def stage_texts():
     file_path = os.path.join(directory, '0_all_texts')
     with open(file_path, 'w') as file:
         file.write(all_texts)
-########################################################################################## ↑ 爬取 shakespeare 的内容
+# --------------------------------------------------------------------------------------- ↑ 爬取 shakespeare 的内容
+
 
 def word_count_and_stopwords_identification(text):
     words = word_tokenize(text)
@@ -156,8 +160,8 @@ def word_count_and_stopwords_identification(text):
 
     return noisy_dic, interesting_dic
 
-
 # stop_words = set(stopwords.words('english'))
+
 
 def build_inverted_index(folder_path,noisy_dic):
     stemmer = PorterStemmer()
@@ -177,18 +181,45 @@ def build_inverted_index(folder_path,noisy_dic):
                             inverted_index[stemmed_word].add(filename)
     return inverted_index
 
+
 def save_inverted_index(inverted_index, output_path):
     with open(output_path, 'w', encoding='utf-8') as file:
         for word, files in inverted_index.items():
             file.write(f"{word}: {', '.join(sorted(files))}\n")
 
 
-########################################################################################## ↑ 构建倒排索引
-            
+# --------------------------------------------------------------------------------------- ↑ 构建倒排索引
+
+# def find_files_with_words(word1, word2, inverted_index):
+#     stemmer = PorterStemmer()
+#     # 对两个单词进行词干提取
+#     stemmed_word1 = stemmer.stem(word1.lower())
+#     stemmed_word2 = stemmer.stem(word2.lower())
+#     # 获取两个单词对应的文件集合
+#     files_with_word1 = inverted_index.get(stemmed_word1, set())
+#     files_with_word2 = inverted_index.get(stemmed_word2, set())
+#     # 返回两个集合的交集
+#     return files_with_word1.intersection(files_with_word2)
+
+def find_files_with_words(wordlist, inverted_index):
+    stemmer = PorterStemmer()
+    # 对两个单词进行词干提取
+    cnt = 0
+    pre_files_with_word = set()
+    for word in wordlist:
+        cnt += 1
+        stemmed_word = stemmer.stem(word.lower())
+        files_with_word = inverted_index.get(stemmed_word, set())
+        if cnt > 1:
+            union_file = files_with_word.intersection(pre_files_with_word)
+        else:
+            union_file = files_with_word
+        pre_files_with_word = union_file
+    return pre_files_with_word
+
+# --------------------------------------------------------------------------------------- ↑ 搜索
 
 
-
-########################################################################################## ↑ 搜索
 def main():
     # stage_texts()
 
@@ -205,8 +236,12 @@ def main():
     print("building inverted file index...")
     folder_path = './shakespeare_works'  # 资料文件夹路径
     output_path = './output.txt'  # 输出文件路径
-    inverted_index = build_inverted_index(folder_path,noisy_dic)
+    inverted_index = build_inverted_index(folder_path, noisy_dic)
     save_inverted_index(inverted_index, output_path)
+    input_words = input("请输入需要查询的单词，用空格分隔: ").lower().split()
+    book_name_list = find_files_with_words(input_words,inverted_index)
+    for book_name in book_name_list:
+        print(book_name)
 
 
 if __name__ == '__main__':
