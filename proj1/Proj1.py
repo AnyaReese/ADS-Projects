@@ -220,30 +220,33 @@ def find_word_intersection_and_positions(inverted_index, words):
     # 使用默认字典来存储每个文件及其对应的单词位置
     stemmer = PorterStemmer()
     file_word_positions = defaultdict(lambda: defaultdict(list))
-    real_word_cnt = 0
-    min_comb = None
+    min_comb = [None,None,None,None,None]
+    min_var = [114514, 114514, 114514, 114514, 114514]
+    appear_list = []
     # 对于查询中的每个单词
     for word in words:
         stemmed_word = stemmer.stem(word.lower())
         # 在倒排索引中查找单词
         if stemmed_word in inverted_index:
-            real_word_cnt += 1
-            # 遍历该单词出现的所有文件及位置
-            for filename, position in inverted_index[stemmed_word]:
-                # 记录文件中单词的位置
-                file_word_positions[filename][stemmed_word].append(position)
+            if stemmed_word not in appear_list:
+                appear_list.append(stemmed_word)
+                # 遍历该单词出现的所有文件及位置
+                for filename, position in inverted_index[stemmed_word]:
+                    # 记录文件中单词的位置
+                    file_word_positions[filename][stemmed_word].append(position)
     # print(file_word_positions.items())
     # 筛选出同时包含所有单词的文件
     intersection_files = {
         filename: positions for filename, positions in file_word_positions.items()
-        if len(positions) == real_word_cnt
+        if len(positions) == len(appear_list)
     }
-    min_var = 114514
     for filename in intersection_files:
         var = calculate_the_min_var(intersection_files[filename])
-        if min_var > var:
-            min_var = var
-            min_comb = filename
+        for i in range(5):
+            if min_var[i] > var:
+                min_var[i] = var
+                min_comb[i] = filename
+                break
 
     return min_comb
 
@@ -274,13 +277,21 @@ def main():
         if input_words == ["-1"]:
             break
         name = find_word_intersection_and_positions(inverted_index, input_words)
-        if name is None: print("nothing found,because your words is noisy_words!")
+        if name[0] is None:
+            print("nothing found,because your words is noisy_words!")
         else:
-            book_name, act, scene, txt = name.split(".")
-            print("The sentence: \"", sentence, "\" probably comes from Scene ", scene, ", Act", act, "of ", book_name)
-        #     for book_name in book_name_list:
-        #         bookname, act, scene, txt = book_name.split(".")
-        #         print("The sentence: \"", sentence, "\" comes from Scene ", scene, ", Act", act, "of ", bookname)
+            for i in range(5):
+                if name[i] is None:
+                    break
+                book_name1 = name[i].split(".")
+                if book_name1[1] == "txt":
+                    print("The sentence: \"", sentence, "\" probably comes from ", book_name1[0])
+                elif book_name1[2] == "txt":
+                    print("The sentence: \"", sentence, "\" probably comes from Chapter", book_name1[1], "of", book_name1[0])
+                else:
+                    print("The sentence: \"", sentence, "\" probably comes from Scene", book_name1[2], ", Act", book_name1[1], "of", book_name1[0])
+                if i == 0:
+                    print("For more...")
 
 
 if __name__ == '__main__':
