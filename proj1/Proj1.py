@@ -163,7 +163,7 @@ def word_count_and_stopwords_identification(text):
 # stop_words = set(stopwords.words('english'))
 
 
-def build_inverted_index(folder_path,noisy_dic):
+def build_inverted_index(folder_path, noisy_dic):
     stemmer = PorterStemmer()
     inverted_index = {}
     for filename in os.listdir(folder_path):
@@ -172,20 +172,23 @@ def build_inverted_index(folder_path,noisy_dic):
             with open(file_path, 'r', encoding='utf-8') as file:
                 content = file.read().lower()
                 words = nltk.word_tokenize(content)
-                for word in words:
+                for position, word in enumerate(words):
                     if word not in noisy_dic:
                         stemmed_word = stemmer.stem(word)
                         if stemmed_word not in inverted_index:
-                            inverted_index[stemmed_word] = {filename}
+                            inverted_index[stemmed_word] = [(filename, position)]
                         else:
-                            inverted_index[stemmed_word].add(filename)
+                            inverted_index[stemmed_word].append((filename, position))
     return inverted_index
 
 
 def save_inverted_index(inverted_index, output_path):
     with open(output_path, 'w', encoding='utf-8') as file:
-        for word, files in inverted_index.items():
-            file.write(f"{word}: {', '.join(sorted(files))}\n")
+        for word, file_positions in inverted_index.items():
+            file.write(f"{word}: ")
+            file_entries = [f"{filename}@{position}" for filename, position in file_positions]
+            file.write(f"{', '.join(sorted(file_entries))}\n")
+
 
 
 # --------------------------------------------------------------------------------------- ↑ 构建倒排索引
