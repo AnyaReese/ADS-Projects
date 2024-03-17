@@ -193,37 +193,55 @@ def save_inverted_index(inverted_index, output_path):
 
 # --------------------------------------------------------------------------------------- ↑ 构建倒排索引
 
-# def find_files_with_words(word1, word2, inverted_index):
+
+from collections import defaultdict
+
+def find_word_intersection_and_positions(inverted_index, words):
+    # 使用默认字典来存储每个文件及其对应的单词位置
+    stemmer = PorterStemmer()
+    file_word_positions = defaultdict(lambda: defaultdict(list))
+    real_word_cnt = 0
+    # 对于查询中的每个单词
+    for word in words:
+        stemmed_word = stemmer.stem(word.lower())
+        # 在倒排索引中查找单词
+        if stemmed_word in inverted_index:
+            print(stemmed_word)
+            real_word_cnt += 1
+            # 遍历该单词出现的所有文件及位置
+            for filename, position in inverted_index[stemmed_word]:
+                # 记录文件中单词的位置
+                file_word_positions[filename][stemmed_word].append(position)
+    print(file_word_positions.items())
+    # 筛选出同时包含所有单词的文件
+    # intersection_files = {
+    #     filename: positions for filename, positions in file_word_positions.items()
+    #     if len(positions) == real_word_cnt
+    # }
+    # return intersection_files
+
+
+
+# def find_files_with_words(wordlist, inverted_index, noisy_dic):
 #     stemmer = PorterStemmer()
 #     # 对两个单词进行词干提取
-#     stemmed_word1 = stemmer.stem(word1.lower())
-#     stemmed_word2 = stemmer.stem(word2.lower())
-#     # 获取两个单词对应的文件集合
-#     files_with_word1 = inverted_index.get(stemmed_word1, set())
-#     files_with_word2 = inverted_index.get(stemmed_word2, set())
-#     # 返回两个集合的交集
-#     return files_with_word1.intersection(files_with_word2)
-
-def find_files_with_words(wordlist, inverted_index, noisy_dic):
-    stemmer = PorterStemmer()
-    # 对两个单词进行词干提取
-    cnt = 0
-    pre_files_with_word = set()
-
-    for word in wordlist:
-        stemmed_word = stemmer.stem(word.lower())
-        # print(stemmed_word)
-        if stemmed_word in noisy_dic:
-            continue
-        cnt += 1
-        files_with_word = inverted_index.get(stemmed_word, set())
-        if not files_with_word: continue
-        if cnt > 1:
-            union_file = files_with_word.intersection(pre_files_with_word)
-        else:
-            union_file = files_with_word
-        pre_files_with_word = union_file
-    return pre_files_with_word,cnt
+#     documents_set = None
+#     for word in wordlist:
+#         stemmed_word = stemmer.stem(word.lower())
+#         # print(stemmed_word)
+#         if stemmed_word in noisy_dic:
+#             continue
+#
+#         files_with_word = set([filename for filename, _ in inverted_index.get(stemmed_word, [])])
+#         posit_with_word = set([position for _, position in inverted_index.get(stemmed_word, [])])
+#
+#         if not files_with_word: continue
+#         if documents_set is None:
+#             documents_set = files_with_word
+#         else:
+#             documents_set = documents_set.intersection(files_with_word)
+#
+#     return documents_set
 
 # --------------------------------------------------------------------------------------- ↑ 搜索
 
@@ -246,17 +264,18 @@ def main():
     output_path = './output.txt'  # 输出文件路径
     inverted_index = build_inverted_index(folder_path, noisy_dic)
     save_inverted_index(inverted_index, output_path)
-    while(1):
+    while 1:
         sentence = input("请输入需要查询的内容，如果要退出查询请输入-1:")
         input_words = sentence.lower().split()
-        if input_words == "-1":
+        if input_words == ["-1"]:
             break
-        book_name_list,whether_appear = find_files_with_words(input_words, inverted_index, noisy_dic)
-        if whether_appear == 0: print("nothing found,because your words is noisy_words!")
-        else:
-            for book_name in book_name_list:
-                bookname, act, scene, txt = book_name.split(".")
-                print("The sentence: \"", sentence, "\" comes from Scene ", scene, ", Act", act, "of ", bookname)
+        find_word_intersection_and_positions(inverted_index, input_words)
+        # book_name_list = find_files_with_words(input_words, inverted_index, noisy_dic)
+        # if book_name_list is None: print("nothing found,because your words is noisy_words!")
+        # else:
+        #     for book_name in book_name_list:
+        #         bookname, act, scene, txt = book_name.split(".")
+        #         print("The sentence: \"", sentence, "\" comes from Scene ", scene, ", Act", act, "of ", bookname)
 
 
 
