@@ -120,6 +120,8 @@ def stage_texts():
         text_without_punc = re.sub(r'[^\w\s]', ' ', text)
         file_name = link.split('/')[-1].replace('.html', '') + '.txt'
         file_path = os.path.join(directory_name, file_name)
+        if file_name == "full":
+            continue
         with open(file_path, 'w') as file:
             file.write(text_without_punc)
 
