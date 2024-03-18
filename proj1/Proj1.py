@@ -39,13 +39,14 @@ from collections import defaultdict
 
 STOP_POINT = 2000  # stop words 的阈值
 
+
 # When first use, please uncomment next two line!!
 # nltk.download('stopwords')
 # nltk.download('punkt')
 # Download the stopwords
 
 
-def get_all_links(url): # DONE: 从网页获取多个包含文本的链接
+def get_all_links(url):  # DONE: 从网页获取多个包含文本的链接
     response = requests.get(url)
     if response.status_code != 200:
         return "Error: Failed to retrieve data"
@@ -88,7 +89,7 @@ def get_all_links(url): # DONE: 从网页获取多个包含文本的链接
     return valid_scene_links
 
 
-def get_shakespeare_text(url): # DONE: 从网页获取莎士比亚文本
+def get_shakespeare_text(url):  # DONE: 从网页获取莎士比亚文本
     response = requests.get(url)
     if response.status_code != 200:
         return "Error: Failed to retrieve data"
@@ -108,20 +109,24 @@ def get_shakespeare_text(url): # DONE: 从网页获取莎士比亚文本
 
 
 def stage_texts():
-    # 获取文本（需要根据实际URL调整）
+    print("[Info] getting urls...")
     base_url = 'http://shakespeare.mit.edu/'
     works_links = get_all_links(base_url)
 
     directory_name = 'shakespeare_works'
+
     if not os.path.exists(directory_name):
         os.makedirs(directory_name)
+    count = 0
+    print("[Info] saving texts to local place... Please wait a while...")
     for link in works_links:
+        if count % 50 == 0:
+            print("[Info] Saving text process " + str(int((count / 913) * 100)) + "%")
+        count += 1
         text = get_shakespeare_text(link)
         text_without_punc = re.sub(r'[^\w\s]', ' ', text)
         file_name = link.split('/')[-1].replace('.html', '') + '.txt'
         file_path = os.path.join(directory_name, file_name)
-        if file_name == "full":
-            continue
         with open(file_path, 'w') as file:
             file.write(text_without_punc)
 
@@ -139,6 +144,11 @@ def stage_texts():
     file_path = os.path.join(directory, '0_all_texts')
     with open(file_path, 'w') as file:
         file.write(all_texts)
+
+    redunt_file = os.path.join(directory, 'full.txt')
+    os.remove(redunt_file)
+
+
 # --------------------------------------------------------------------------------------- ↑ 爬取 shakespeare 的内容
 
 
@@ -166,6 +176,7 @@ def word_count_and_stopwords_identification(text):
             interesting_dic[word] = count
 
     return noisy_dic, interesting_dic
+
 
 # stop_words = set(stopwords.words('english'))
 
@@ -198,7 +209,6 @@ def save_inverted_index(inverted_index, output_path):
             file.write(f"{', '.join(sorted(file_entries))}\n")
 
 
-
 # --------------------------------------------------------------------------------------- ↑ 构建倒排索引
 
 
@@ -223,7 +233,7 @@ def find_word_intersection_and_positions(inverted_index, words):
     # 使用默认字典来存储每个文件及其对应的单词位置
     stemmer = PorterStemmer()
     file_word_positions = defaultdict(lambda: defaultdict(list))
-    min_comb = [None,None,None,None,None]
+    min_comb = [None, None, None, None, None]
     min_var = [114514, 114514, 114514, 114514, 114514]
     appear_list = []
     # 对于查询中的每个单词
@@ -253,6 +263,7 @@ def find_word_intersection_and_positions(inverted_index, words):
 
     return min_comb
 
+
 # --------------------------------------------------------------------------------------- ↑ 搜索
 
 
@@ -262,35 +273,35 @@ def main():
     with open(os.path.join('shakespeare_works', '0_all_texts'), 'r') as file:
         all_texts = file.read()
 
-    print("accessing noisy dic...")
+    print("[Info] accessing noisy dic...")
     # 获取停用词和词频，用字典存储，用于后续的词频统计
     noisy_dic, interesting_dic = word_count_and_stopwords_identification(all_texts)
     with open('./noisy_dic.txt', 'w', encoding='utf-8') as file:
         for word, count in noisy_dic.items():
             file.write(f"{word}: {count}\n")
 
-    print("building inverted file index...")
+    print("[info] building inverted file index...")
     folder_path = './shakespeare_works'  # 资料文件夹路径
     output_path = './output.txt'  # 输出文件路径
     inverted_index = build_inverted_index(folder_path, noisy_dic)
     save_inverted_index(inverted_index, output_path)
     while 1:
-        sentence = input("请输入需要查询的内容，如果要退出查询请输入-1:")
+        sentence = input("[Input Info] Please enter the word or sentence you want to query, enter -1 to quit: ")
         input_words = sentence.lower().split()
         if input_words == ["-1"]:
             break
         name = find_word_intersection_and_positions(inverted_index, input_words)
         if name[0] is None:
-            print("nothing found,because your words is noisy_words!")
+            print("[Info] nothing found,because your words is noisy_words!")
         else:
             for i in range(5):
                 if name[i] is None:
                     break
                 book_name1 = name[i].split(".")
                 if book_name1[1] == "txt":
-                    print("\""+sentence+"\" probably comes from ", book_name1[0])
+                    print("\"" + sentence + "\" probably comes from ", book_name1[0])
                 elif book_name1[2] == "txt":
-                    print("\""+sentence+"\" probably comes from Chapter", book_name1[1], "of", book_name1[0])
+                    print("\"" + sentence + "\" probably comes from Chapter", book_name1[1], "of", book_name1[0])
                 else:
                     flag = 0
                     part = book_name1[1][0]
@@ -298,10 +309,13 @@ def main():
                         book_name1[0] = 'Henry IV'
                         flag = 1
                     if flag:
-                        print("\""+sentence+"\" probably comes from Part "+part+", Act "+book_name1[1]+", Scene", book_name1[2], "of", book_name1[0])
-                    print("\""+sentence+"\" probably comes from Act "+book_name1[1]+", Scene", book_name1[2], "of", book_name1[0])
-                if i == 0:
-                    print("If there's more possible results, they are as follows(we list 4 more at most):")
+                        print("\"" + sentence + "\" probably comes from Part " + part + ", Act " + book_name1[
+                            1] + ", Scene", book_name1[2], "of", book_name1[0])
+                    else:
+                        print("\"" + sentence + "\" probably comes from Act " + book_name1[1] + ", Scene", book_name1[2],
+                          "of", book_name1[0])
+                if (i == 0) & (name[1] is not None):
+                    print("More possible results are as follows (we list 4 more at most):")
 
 
 if __name__ == '__main__':
