@@ -37,6 +37,7 @@ from nltk.stem import LancasterStemmer
 from nltk.stem import SnowballStemmer
 from collections import defaultdict
 
+STOP_POINT = 2000  # stop words 的阈值
 
 # When first use, please uncomment next two line!!
 # nltk.download('stopwords')
@@ -155,7 +156,7 @@ def word_count_and_stopwords_identification(text):
     interesting_dic = {}
 
     for word, count in word_counts.items():
-        if count >= 100:  # stop words 的阈值
+        if count >= STOP_POINT:  # stop words 的阈值
             noisy_words.add(word)
             noisy_dic[word] = count
         else:
@@ -285,13 +286,20 @@ def main():
                     break
                 book_name1 = name[i].split(".")
                 if book_name1[1] == "txt":
-                    print("The sentence: \"", sentence, "\" probably comes from ", book_name1[0])
+                    print("\""+sentence+"\" probably comes from ", book_name1[0])
                 elif book_name1[2] == "txt":
-                    print("The sentence: \"", sentence, "\" probably comes from Chapter", book_name1[1], "of", book_name1[0])
+                    print("\""+sentence+"\" probably comes from Chapter", book_name1[1], "of", book_name1[0])
                 else:
-                    print("The sentence: \"", sentence, "\" probably comes from Scene", book_name1[2], ", Act", book_name1[1], "of", book_name1[0])
+                    flag = 0
+                    part = book_name1[1][0]
+                    if 'henryiv' in book_name1[0]:
+                        book_name1[0] = 'Henry IV'
+                        flag = 1
+                    if flag:
+                        print("\""+sentence+"\" probably comes from Part "+part+", Act "+book_name1[1]+", Scene", book_name1[2], "of", book_name1[0])
+                    print("\""+sentence+"\" probably comes from Act "+book_name1[1]+", Scene", book_name1[2], "of", book_name1[0])
                 if i == 0:
-                    print("For more...")
+                    print("If there's more possible results, they are as follows(we list 4 more at most):")
 
 
 if __name__ == '__main__':
