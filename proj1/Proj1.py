@@ -158,12 +158,10 @@ def stage_texts():
 # --------------------------------------------------------------------------------------- ↑ 爬取 shakespeare 的内容
 
 
-def word_count_and_stopwords_identification(text):
+def word_count_and_stopwords_identification(text):    # 根据出现频率判断停用词
     words = word_tokenize(text)
-
-    # 没用这个，自己根据出现频率判断停用词
-    stop_words = set(stopwords.words('english'))
-    punctuations = set(string.punctuation)
+    # stop_words = set(stopwords.words('english'))
+    # punctuations = set(string.punctuation)
     # filtered_words = [word.lower() for word in words if word.lower() not in stop_words]
 
     filtered_words = [word.lower() for word in words]
@@ -186,34 +184,45 @@ def word_count_and_stopwords_identification(text):
 
 # stop_words = set(stopwords.words('english'))
 
+# --------------------------------------------------------------------------------------- ↑ 生成停用词字典
 
 def build_inverted_index(folder_path, noisy_dic):
-    stemmer = PorterStemmer()
-    inverted_index = {}
+    stemmer = PorterStemmer()  # Initialize a stemmer for word normalization
+    inverted_index = {}  # Create an empty dictionary to store the inverted index
+
+    # Iterate over all files in the given folder path
     for filename in os.listdir(folder_path):
         if filename.endswith('.txt'):
             file_path = os.path.join(folder_path, filename)
             with open(file_path, 'r', encoding='utf-8') as file:
-                content = file.read().lower()
-                words = nltk.word_tokenize(content)
+                content = file.read().lower()  # Convert the content to lowercase
+                words = nltk.word_tokenize(content)  # Tokenize the text into words
+
+                # Iterate over each word and its position in the text
                 for position, word in enumerate(words):
-                    stemmed_word = stemmer.stem(word)
+                    stemmed_word = stemmer.stem(word)  # Stem the word to its base form
                     if stemmed_word not in noisy_dic:
+                        # If the word is not already in the inverted index, create a new index
                         if stemmed_word not in inverted_index:
                             inverted_index[stemmed_word] = [(filename, position)]
                         else:
+                            # Otherwise, append it
                             inverted_index[stemmed_word].append((filename, position))
+    
+    print(Fore.GREEN + "[info]" + Fore.RESET + "Sorting...")
+    # Sort the inverted index based on the length of postings lists
     sorted_index = dict(sorted(inverted_index.items(), key=lambda x: len(x[1])))
     return sorted_index
 
 
 def save_inverted_index(inverted_index, output_path):
     with open(output_path, 'w', encoding='utf-8') as file:
+        # Iterate over each word and its positions in the inverted index
         for word, file_positions in inverted_index.items():
             file.write(f"{word}: ")
+            # Format each occurrence as "filename@position"
             file_entries = [f"{filename}@{position}" for filename, position in file_positions]
             file.write(f"{', '.join(sorted(file_entries))}\n")
-
 
 # --------------------------------------------------------------------------------------- ↑ 构建倒排索引
 
@@ -304,7 +313,15 @@ def main():
         name = find_word_intersection_and_positions(inverted_index, input_words)
         # If the list of book titles returned is empty, then we consider the query to have failed and return a failure prompt
         if name[0] is None:
-            print(Fore.RED + "[ERROR]" + Fore.RESET + " nothing found,because your words is noisy_words!")
+            flag = 1
+            for words in input_words:
+                if words in noisy_dic:
+                    flag=0
+
+            if flag == 0:
+                print(Fore.RED + "[ERROR]" + Fore.RESET + " Nothing found,because the words is noisy_words!")
+            else:
+                print(Fore.RED + "[ERROR]" + Fore.RESET + " Nothing found,because the words never appeared!")
         # If not, we will start outputting our five possible query results
         else:
             for i in range(5):
