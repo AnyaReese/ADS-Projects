@@ -36,9 +36,10 @@ from nltk.stem import PorterStemmer
 from nltk.stem import LancasterStemmer
 from nltk.stem import SnowballStemmer
 from collections import defaultdict
+from colorama import init, Fore, Back, Style
 
-STOP_POINT = 2000  # stop words 的阈值
-
+STOP_POINT = 2000       # stop words 的阈值
+init(autoreset=True)    # colorama init
 
 # When first use, please uncomment next two line!!
 # nltk.download('stopwords')
@@ -279,49 +280,62 @@ def main():
     with open(os.path.join('shakespeare_works', '0_all_texts'), 'r') as file:
         all_texts = file.read()
 
-    print("[Info] accessing noisy dic...")
+    print(Fore.GREEN + "[info]" + Fore.RESET + " accessing noisy dic...")
     # get the noisy words and interesting words
     noisy_dic, interesting_dic = word_count_and_stopwords_identification(all_texts)
     with open('./noisy_dic.txt', 'w', encoding='utf-8') as file:
         for word, count in noisy_dic.items():
             file.write(f"{word}: {count}\n")
 
-    print("[info] building inverted file index...")
+    print(Fore.GREEN + "[info]" + Fore.RESET + " building inverted file index...")
     folder_path = './shakespeare_works'  # directory of the texts
     output_path = './output.txt'  # output file
     inverted_index = build_inverted_index(folder_path, noisy_dic)
     save_inverted_index(inverted_index, output_path)
     while 1:
-        sentence = input("[Input Info] Please enter the word or sentence you want to query, enter -1 to quit: ")
+        # Provide input prompts and obtain input sentences
+        sentence = input(Fore.GREEN + "[Input Info]" + Fore.RESET + " Please enter the word or sentence you want to query, enter -1 to quit: ")
+        # Split the words in the sentence and convert them to lowercase uniformly
         input_words = sentence.lower().split()
+        # If the user wishes to exit the program, i.e. enters -1, then we exit the current loop
         if input_words == ["-1"]:
             break
+        # Call the search function to obtain a list of book titles
         name = find_word_intersection_and_positions(inverted_index, input_words)
+        # If the list of book titles returned is empty, then we consider the query to have failed and return a failure prompt
         if name[0] is None:
-            print("[Info] nothing found,because your words is noisy_words!")
+            print(Fore.RED + "[ERROR]" + Fore.RESET + " nothing found,because your words is noisy_words!")
+        # If not, we will start outputting our five possible query results
         else:
             for i in range(5):
+                # There may be a situation where there are fewer than five search results, and if encountering a situation where the loop ends directly
                 if name[i] is None:
                     break
-                book_name1 = name[i].split(".")
-                if book_name1[1] == "txt":
-                    print("\"" + sentence + "\" probably comes from ", book_name1[0])
-                elif book_name1[2] == "txt":
-                    print("\"" + sentence + "\" probably comes from Chapter", book_name1[1], "of", book_name1[0])
+                # 为了是搜索结果更加美观，我们将文件名尝试拆分，可以得到三类：
+                # 1. <BookName>.<Act>.<Scene>.txt
+                # 2. <BookName>.<Chapter>.txt
+                # 3. <BookName>.txt
+                book_name = name[i].split(".")
+                if book_name[1] == "txt":
+                    print("\"" + sentence + "\" probably comes from ", book_name[0])
+                elif book_name[2] == "txt":
+                    print("\"" + sentence + "\" probably comes from Chapter", book_name[1], "of", book_name[0])
+                # In this case, there may be some special situations where we have applied some patches to optimize the user experience
                 else:
-                    flag = 0
-                    part = book_name1[1][0]
-                    if 'henryiv' in book_name1[0]:
-                        book_name1[0] = 'Henry IV'
-                        flag = 1
-                    if flag:
-                        print("\"" + sentence + "\" probably comes from Part " + part + ", Act " + book_name1[
-                            1] + ", Scene", book_name1[2], "of", book_name1[0])
+                    henryiv_flag = 0
+                    part = book_name[1][0]
+                    if 'henryiv' in book_name[0]:
+                        book_name[0] = 'Henry IV'
+                        henryiv_flag = 1
+                    if henryiv_flag:
+                        print("\"" + sentence + "\" probably comes from Part " + part + ", Act " + book_name[
+                            1] + ", Scene", book_name[2], "of", book_name[0])
                     else:
-                        print("\"" + sentence + "\" probably comes from Act " + book_name1[1] + ", Scene", book_name1[2],
-                          "of", book_name1[0])
+                        print("\"" + sentence + "\" probably comes from Act " + book_name[1] + ", Scene", book_name[2],
+                              "of", book_name[0])
                 if (i == 0) & (name[1] is not None):
                     print("More possible results are as follows (we list 4 more at most):")
+
 
 
 if __name__ == '__main__':
