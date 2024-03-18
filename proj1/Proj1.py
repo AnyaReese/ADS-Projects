@@ -45,21 +45,26 @@ STOP_POINT = 2000  # stop words 的阈值
 # nltk.download('punkt')
 # Download the stopwords
 
-
-def get_all_links(url):  # DONE: 从网页获取多个包含文本的链接
+'''
+    @author AnyaReese
+    @brief every URL that contains texts
+    @param url: the base URL
+    @return: a list that includes every URL that contains texts
+'''
+def get_all_links(url):  # DONE: get all links that contains texts
     response = requests.get(url)
     if response.status_code != 200:
         return "Error: Failed to retrieve data"
 
     soup = BeautifulSoup(response.content, 'html.parser')
-    links = soup.find_all('a')  # 假设所有的子目录都是通过<a>标签链接的
+    links = soup.find_all('a')  # every sub link in the page
 
     valid_doc_links = []
     valid_scene_links = []
 
     for link in links:
         href = link.get('href')
-        if href and not href.startswith('http'):  # 排除外部链接
+        if href and not href.startswith('http'):  # except for external links
             if href and href.endswith('VenusAndAdonis.html'):
                 valid_scene_links.append(url + href)
             elif href and href.endswith('LoversComplaint.html'):
@@ -89,21 +94,21 @@ def get_all_links(url):  # DONE: 从网页获取多个包含文本的链接
     return valid_scene_links
 
 
-def get_shakespeare_text(url):  # DONE: 从网页获取莎士比亚文本
+def get_shakespeare_text(url):  # DONE: get the text from the URL
     response = requests.get(url)
     if response.status_code != 200:
         return "Error: Failed to retrieve data"
 
-    # 使用 BeautifulSoup 解析 HTML
+    # use BeautifulSoup to parse the HTML
     soup = BeautifulSoup(response.content, 'html.parser')
 
-    # 文本被 <blockquote> 标签包围
+    # text <blockquote> blocks
     text_blocks = soup.find_all('blockquote')
     if text_blocks:
         text = ''
         for block in text_blocks:
-            text += block.get_text() + '\n'  # 可以根据需要添加分隔符
-        return text.strip()  # 去除首尾的空白字符
+            text += block.get_text() + '\n'  # add a new line after each block
+        return text.strip()  # get rid of leading/trailing whitespaces
     else:
         return "Error: Text blocks not found"
 
@@ -133,11 +138,11 @@ def stage_texts():
     all_texts = ''
     directory = 'shakespeare_works'
     for filename in os.listdir(directory):
-        # 检查文件是否以txt为扩展名
+        # check if the file is a text file
         if filename.endswith('.txt'):
-            # 构建文件的完整路径
+            # build the full path to the file
             filepath = os.path.join(directory, filename)
-            # 读取文件内容并将其添加到all_texts中
+            # read the file
             with open(filepath, 'r') as file:
                 all_texts += file.read()
 
@@ -168,7 +173,7 @@ def word_count_and_stopwords_identification(text):
     interesting_dic = {}
 
     for word, count in word_counts.items():
-        if count >= STOP_POINT:  # stop words 的阈值
+        if count >= STOP_POINT:  # stop words' sherhold
             noisy_words.add(word)
             noisy_dic[word] = count
         else:
@@ -213,13 +218,13 @@ def save_inverted_index(inverted_index, output_path):
 
 
 def calculate_the_min_var(data):
-    # 生成所有可能的数字组合
+    # generate all combinations of the data
     all_combinations = itertools.product(*(data[key] for key in sorted(data.keys())))
 
     min_variance = float('inf')
     min_combination = None
 
-    # 遍历所有组合以找到方差最小的组合
+    # return the combination with the minimum variance
     for combination in all_combinations:
         variance = np.var(combination)
         if variance < min_variance:
@@ -230,29 +235,30 @@ def calculate_the_min_var(data):
 
 
 def find_word_intersection_and_positions(inverted_index, words):
-    # 使用默认字典来存储每个文件及其对应的单词位置
+    # use PorterStemmer to stem the words
     stemmer = PorterStemmer()
     file_word_positions = defaultdict(lambda: defaultdict(list))
     min_comb = [None, None, None, None, None]
     min_var = [114514, 114514, 114514, 114514, 114514]
     appear_list = []
-    # 对于查询中的每个单词
+
     for word in words:
         stemmed_word = stemmer.stem(word.lower())
-        # 在倒排索引中查找单词
+        # find word in the inverted index
         if stemmed_word in inverted_index:
             if stemmed_word not in appear_list:
                 appear_list.append(stemmed_word)
-                # 遍历该单词出现的所有文件及位置
+                # traverse the file positions of the word
                 for filename, position in inverted_index[stemmed_word]:
-                    # 记录文件中单词的位置
+                    # record the file and the position of the word
                     file_word_positions[filename][stemmed_word].append(position)
     # print(file_word_positions.items())
-    # 筛选出同时包含所有单词的文件
+    # find the intersection of the files
     intersection_files = {
         filename: positions for filename, positions in file_word_positions.items()
         if len(positions) == len(appear_list)
     }
+    
     for filename in intersection_files:
         var = calculate_the_min_var(intersection_files[filename])
         for i in range(5):
@@ -274,15 +280,15 @@ def main():
         all_texts = file.read()
 
     print("[Info] accessing noisy dic...")
-    # 获取停用词和词频，用字典存储，用于后续的词频统计
+    # get the noisy words and interesting words
     noisy_dic, interesting_dic = word_count_and_stopwords_identification(all_texts)
     with open('./noisy_dic.txt', 'w', encoding='utf-8') as file:
         for word, count in noisy_dic.items():
             file.write(f"{word}: {count}\n")
 
     print("[info] building inverted file index...")
-    folder_path = './shakespeare_works'  # 资料文件夹路径
-    output_path = './output.txt'  # 输出文件路径
+    folder_path = './shakespeare_works'  # directory of the texts
+    output_path = './output.txt'  # output file
     inverted_index = build_inverted_index(folder_path, noisy_dic)
     save_inverted_index(inverted_index, output_path)
     while 1:
