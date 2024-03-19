@@ -316,7 +316,7 @@ def main():
             flag = 1
             for words in input_words:
                 if words in noisy_dic:
-                    flag=0
+                    flag = 0
 
             if flag == 0:
                 print(Fore.RED + "[ERROR]" + Fore.RESET + " Nothing found,because the words is noisy_words!")
@@ -358,4 +358,3 @@ def main():
 if __name__ == '__main__':
     main()
 
-# it is the east and Juliet is the sun
