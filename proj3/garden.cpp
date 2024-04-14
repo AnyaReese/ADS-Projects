@@ -24,8 +24,6 @@ struct Path {
 struct Garden {
     int connector_index;
     int degree;
-//    int prefixsum;
-
 };
 
 int ConnectorNum = 0;
@@ -114,7 +112,6 @@ int main() {
         for (int j = 1; j <= m; ++j) {
             cin >> degree;
             garden[i][j].degree = degree;
-            // garden[i][j].prefixsum = garden[i-1][j].prefixsum + garden[i][j-1].prefixsum + degree; // prefix sum
             if (degree > 0) {
                 garden[i][j].connector_index = ConnectorNum;
                 connectors[ConnectorNum].row = i;
@@ -124,7 +121,7 @@ int main() {
             }
         }
     }
-    if(totaldegree%2==1){
+    if (totaldegree % 2 == 1){
         cout << "No Solution" << endl;
         return 0;
     }
