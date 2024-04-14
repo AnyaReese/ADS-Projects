@@ -37,7 +37,7 @@ bool solution = false;
 void restoreGarden(int PathIndex, int ValidPathNum, const vector<vector<Garden> > &garden, vector<Path> &paths,
                    vector<Connector> &connectors) {
     // Involve backtracking and checking the validity of the fence placement.
-    if (PathIndex > TotalPathnum || solution) return;
+    if (PathIndex > TotalPathnum || solution || ValidPathNum > PathNum) return;
 
     int Connector1_index;
     int Connector2_index;
@@ -47,25 +47,28 @@ void restoreGarden(int PathIndex, int ValidPathNum, const vector<vector<Garden> 
     //     cout<<paths[i].valid<<" ";
     // }
     // cout<<"\n";
+
     // Check the validity of the fence placement
     if (ValidPathNum == PathNum) {
+
 //        bool flag = true;
-        for (int i = 0; i < TotalPathnum; ++i) {
-            if (paths[i].valid) {
-                Connector1_index = garden[paths[i].begin.x][paths[i].begin.y].connector_index; // The Connector index of the begin of the path
-                Connector2_index = garden[paths[i].end.x][paths[i].end.y].connector_index;     // The Connector index of the end of the path
-                if (connectors[Connector1_index].degree + 1 > garden[paths[i].begin.x][paths[i].begin.y].degree ||
-                    connectors[Connector2_index].degree + 1 > garden[paths[i].end.x][paths[i].end.y].degree) {
-                    // cout<<"fail 1";
-                    for (int j = 0; j < ConnectorNum; ++j) {
-                        connectors[j].degree = 0;
-                    }
-                    return;
-                }
-                connectors[Connector1_index].degree++;
-                connectors[Connector2_index].degree++;
-            }
-        }
+        // for (int i = 0; i < TotalPathnum; ++i) {
+        //     if (paths[i].valid) {
+        //         Connector1_index = garden[paths[i].begin.x][paths[i].begin.y].connector_index; // The Connector index of the begin of the path
+        //         Connector2_index = garden[paths[i].end.x][paths[i].end.y].connector_index;     // The Connector index of the end of the path
+        //         if (connectors[Connector1_index].degree + 1 > garden[paths[i].begin.x][paths[i].begin.y].degree ||
+        //             connectors[Connector2_index].degree + 1 > garden[paths[i].end.x][paths[i].end.y].degree) {
+        //             // cout<<"fail 1";
+        //             for (int j = 0; j < ConnectorNum; ++j) {
+        //                 connectors[j].degree = 0;
+        //             }
+        //             return;
+        //         }
+        //         connectors[Connector1_index].degree++;
+        //         connectors[Connector2_index].degree++;
+        //     }
+        // }
+        
         for (int i = 0; i < ConnectorNum; ++i) {
             if (connectors[i].degree != garden[connectors[i].row][connectors[i].col].degree) {
                 // cout<<"fail 2";
@@ -93,10 +96,19 @@ void restoreGarden(int PathIndex, int ValidPathNum, const vector<vector<Garden> 
 
     // Reverse the all potential paths
 
-//    Connector1_index = garden[paths[PathIndex].begin.x][paths[PathIndex].begin.y].connector_index; // The Connector index of the begin of the path
-//    Connector2_index = garden[paths[PathIndex].end.x][paths[PathIndex].end.y].connector_index;     // The Connector index of the end of the path
-    paths[PathIndex].valid = 1;
-    restoreGarden(PathIndex + 1, ValidPathNum + 1, garden, paths, connectors);
+    Connector1_index = garden[paths[PathIndex].begin.x][paths[PathIndex].begin.y].connector_index; // The Connector index of the begin of the path
+    Connector2_index = garden[paths[PathIndex].end.x][paths[PathIndex].end.y].connector_index;     // The Connector index of the end of the path
+
+    if( connectors[Connector1_index].degree+1 <= garden[paths[PathIndex].begin.x][paths[PathIndex].begin.y].degree &&
+        connectors[Connector2_index].degree+1 <= garden[paths[PathIndex].end.x][paths[PathIndex].end.y].degree){
+        paths[PathIndex].valid = 1;
+        connectors[Connector1_index].degree++;
+        connectors[Connector2_index].degree++;
+        restoreGarden(PathIndex + 1, ValidPathNum + 1, garden, paths, connectors);
+        connectors[Connector1_index].degree--;
+        connectors[Connector2_index].degree--;
+    }
+
 
     paths[PathIndex].valid = 0;
     restoreGarden(PathIndex + 1, ValidPathNum, garden, paths, connectors);
@@ -108,9 +120,9 @@ void restoreGarden(int PathIndex, int ValidPathNum, const vector<vector<Garden> 
 
 int main() {
     int n, m; // Number of rows and columns in the garden.
-    vector<vector<Garden> > garden; // 2D array to store the garden layout.
-    vector<Connector> connectors(100); // Vector to store all connectors.
-    vector<Path> paths(100);
+    vector<vector<Garden>> garden; // 2D array to store the garden layout.
+    vector<Connector> connectors(3000); // Vector to store all connectors.
+    vector<Path> paths(3000);
     int degree;
     int totaldegree = 0;
     cin >> n >> m;
@@ -135,6 +147,10 @@ int main() {
                 totaldegree += degree;
             }
         }
+    }
+    if(totaldegree%2==1){
+        cout << "No Solution" << endl;
+        return 0;
     }
     PathNum = totaldegree / 2; // Calculate the total number of paths based on the total degree
 
