@@ -24,7 +24,7 @@ struct Path {
 struct Garden {
     int connector_index;
     int degree;
-    int prefixsum;
+//    int prefixsum;
 
 };
 
@@ -49,7 +49,7 @@ void restoreGarden(int PathIndex, int ValidPathNum, const vector<vector<Garden> 
     // cout<<"\n";
     // Check the validity of the fence placement
     if (ValidPathNum == PathNum) {
-        bool flag = true;
+//        bool flag = true;
         for (int i = 0; i < TotalPathnum; ++i) {
             if (paths[i].valid) {
                 Connector1_index = garden[paths[i].begin.x][paths[i].begin.y].connector_index; // The Connector index of the begin of the path
@@ -57,8 +57,8 @@ void restoreGarden(int PathIndex, int ValidPathNum, const vector<vector<Garden> 
                 if (connectors[Connector1_index].degree + 1 > garden[paths[i].begin.x][paths[i].begin.y].degree ||
                     connectors[Connector2_index].degree + 1 > garden[paths[i].end.x][paths[i].end.y].degree) {
                     // cout<<"fail 1";
-                    for (int i = 0; i < ConnectorNum; ++i) {
-                        connectors[i].degree = 0;
+                    for (int j = 0; j < ConnectorNum; ++j) {
+                        connectors[j].degree = 0;
                     }
                     return;
                 }
@@ -93,8 +93,8 @@ void restoreGarden(int PathIndex, int ValidPathNum, const vector<vector<Garden> 
 
     // Reverse the all potential paths
 
-    Connector1_index = garden[paths[PathIndex].begin.x][paths[PathIndex].begin.y].connector_index; // The Connector index of the begin of the path
-    Connector2_index = garden[paths[PathIndex].end.x][paths[PathIndex].end.y].connector_index;     // The Connector index of the end of the path
+//    Connector1_index = garden[paths[PathIndex].begin.x][paths[PathIndex].begin.y].connector_index; // The Connector index of the begin of the path
+//    Connector2_index = garden[paths[PathIndex].end.x][paths[PathIndex].end.y].connector_index;     // The Connector index of the end of the path
     paths[PathIndex].valid = 1;
     restoreGarden(PathIndex + 1, ValidPathNum + 1, garden, paths, connectors);
 
