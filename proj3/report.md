@@ -1,7 +1,14 @@
 <style>
-body, code, pre {
+body, pre {
   font-family: 'Times New Roman', serif;
 }
+</style>
+
+<style>
+    code {
+        font-family: 'Georgia', sans-serif;
+        font-size: 90%;
+    }
 </style>
 
 
@@ -11,7 +18,7 @@ body, code, pre {
 
 ### 1.1 Background
 
-The garden designer drew a diagram of the fence layout, as shown in Figure 1. Here we assume that the garden is an $n\times m$ rectangular space consists of unit squares. All the fences in the diagram are either horizontal or vertical, and are connected together by connectors at certain designated positions. When the workers carried the connectors to the corresponding positions, they found that the design drawing was gone. So now we are facing the situation in Figure 2: several k-way connectors are placed at some positions.
+The garden designer drew a diagram of the fence layout, as shown in Figure 1. Here we assume that the garden is an $n\times m$ rectangular space consists of unit squares. All the fences in the diagram are either horizontal or vertical, and are connected together by connectors at certain designated positions. When the workers carried the connectors to the corresponding positions, they found that the design drawing was gone. So now we are facing the situation in Figure 2: several k-way connectors are placed at some positions.</br>
 Our job is to **restore the diagram**, that is, to recover Figure 1 from Figure 2.
 
 ![](https://images.ptausercontent.com/1155d685-fccf-4a40-8a48-07700011d5dd.jpg)
@@ -20,7 +27,7 @@ This program, given the positions of the connectors, will output the positions o
 
 ### 1.2 Project Overview
 
-The project can be divided into two parts: **connect the connectors** and **recover the diagram**. In the first part, we need to connect all the connectors to find **all the potential paths**.In the second part, we use **backtrace** to recover the diagram by finding the valid paths in the graph.
+The project can be divided into two parts: **connect the connectors** and **recover the diagram**. In the first part, we need to connect all the connectors to find **all the potential paths**. In the second part, we use **backtrace** to recover the diagram by finding the valid paths in the graph.</br>
 We use cpp to implement the project, and the main function is divided into three parts: **create the garden graph**, **find the potential paths**, and **recover the diagram**. We use vector to store the information of the connectors and paths, which is convenient for us to access the information and implemented by cpp standard library. We also use **recursive function** to recover the diagram, which is a typical backtracking algorithm.
 
 ## Chapter2: Algorithm Specification
@@ -76,9 +83,11 @@ int TotalPathnum = 0;
 bool solution = false;
 ```
 
-### 2.2 Funtion1: Create the garden Graph
+### 2.2 Function1: Create the garden Graph
 
-This part is simple, we just need to initialize the garden and store the information of the connectors. We also need to calculate the total degree of all connectors and check whether the total degree is even.
+This part is simple, we just need to initialize the garden and store the information of the connectors.</br>
+We also need to calculate the total degree of all connectors and check whether the total degree is even.
+
 If the total degree is **odd**, then there is **no solution**.
 
 ```cpp
@@ -109,11 +118,16 @@ function initializeAndPopulateGarden(n, m)
         PathNum = totaldegree / 2
 ```
 
-### 2.3 Funtion2: Find the potential Paths
+### 2.3 Function2: Find the potential Paths
 
-We find all the potential paths in the garden and store them in the **paths vector**.. We first find the horizontal paths and then find the vertical paths. We use two loops to **traverse the garden and find the connectors**.
+We find all the potential paths in the garden and store them in the **paths vector**.</br>
+We first find the horizontal paths and then find the vertical paths.</br>
+We use two loops to **traverse the garden and find the connectors**.
 
-We initialize the pre_degree and pre_pos. If the pre_degree is 0 and the current degree is not 0, then we initialize the pre_degree and pre_pos. If the pre_degree is not 0 and the current degree is not 0, then we store the path information in the paths vector. That is, if we **find a connector**, we initialize the pre_degree and pre_pos. Then we find the **next connector** and store the path information in the paths vector.
+We initialize the pre_degree and pre_pos.</br>
+If the pre_degree is 0 and the current degree is not 0, then we initialize the pre_degree and pre_pos.</br>
+If the pre_degree is not 0 and the current degree is not 0, then we store the path information in the paths vector. That is, if we **find a connector**, we initialize the pre_degree and pre_pos.</br> 
+Then we find the **next connector** and store the path information in the paths vector.
 
 ```cpp
 function findPaths(garden, n, m)
@@ -141,11 +155,13 @@ function findPaths(garden, n, m)
 
 ```
 
-### 2.4 Funtion3: Recover the Diagram
+### 2.4 Function3: Recover the Diagram
 
-This part is the **most important part** of the project. We use a **recursive** function to restore the garden diagram. We use **backtracking** to find the **valid paths** in the garden. We also need to check the validity of the fence placement.
-If the degree of the connector is greater than the degree of the garden, then the fence placement is invalid. We also need to check whether the total number of valid paths is equal to the total number of paths. If the total number of valid paths is equal to the total number of paths, then we find a solution.
-We use a **flag solution to** indicate whether a solution is found. If a solution is found, we output the diagram.
+This part is the **most important part** of the project.We use a **recursive** function to restore the garden diagram.We use **backtracking** to find the **valid paths** in the garden.</br> 
+We also need to check the validity of the fence placement.</br>
+If the degree of the connector is greater than the degree of the garden, then the fence placement is invalid.</br>
+We also need to check whether the total number of valid paths is equal to the total number of paths.If the total number of valid paths is equal to the total number of paths, then we find a solution.</br>
+We use a **flag solution** to indicate whether a solution is found. If a solution is found, we output the diagram.
 
 ```cpp
 function restoreGarden(PathIndex, ValidPathNum, garden, paths, connectors)
@@ -179,7 +195,7 @@ function restoreGarden(PathIndex, ValidPathNum, garden, paths, connectors)
 
 ```
 
-### Funtion4: Output the Diagram
+### Function4: Output the Diagram
 
 We output the diagram based on the flag solution. If a solution is found, we output the diagram in the form `row column up down left right`. Otherwise, we output "No Solution".
 
@@ -201,6 +217,8 @@ We output the diagram based on the flag solution. If a solution is found, we out
 
 The degree of the connectors is **odd**. There is **no solution**.
 
+![alt text](./img/image-1.png)
+
 ```txt
 5 6
 0 0 2 0 0 2
@@ -218,6 +236,8 @@ No Solution
 
 ### 3.2 Test Case 2: Normal Case
 
+Input:
+
 ```txt
 5 6
 0 0 2 0 0 2
@@ -226,6 +246,8 @@ No Solution
 0 0 0 0 0 1
 2 0 2 0 0 2
 ```
+
+Output:
 
 ```txt
 1 3 0 1 0 1
@@ -244,6 +266,60 @@ No Solution
 5 6 1 0 1 0
 ```
 
+![alt text](./img/image.png)
+
+Input:
+
+```txt
+3 5
+1 1 2 0 1
+1 0 3 0 2
+1 2 1 0 1
+```
+Output:
+
+```txt
+1 1 0 0 0 1
+1 2 0 0 1 0
+1 3 0 1 0 1
+1 5 0 0 1 0
+2 1 0 0 0 1
+2 3 1 0 1 1
+2 5 0 1 1 0
+3 1 0 0 0 1
+3 2 0 0 1 1
+3 3 0 0 1 0
+3 5 1 0 0 0
+```
+
 ## Chapter4: Analysis and Commnets
 
+This function use backtracking algorithms to solve problems, trying different solutions during the recursive process and finally checking if they are effective. 
+
+### Time complexity
+
+1. **The number of recursive calls:**
+This algorithm is mainly implemented through the recursive function **restoreGarden**. For each path **PathIndex**, this function has two recursive calls - one when the current path is valid and the other when the current path is invalid. This means that for the **Total Pathnum** paths, the possible combination of recursive calls is exponential, approximately $O (2^{Total PathNum})$.
+2. **The complexity of each recursion:**
+    - In recursive calls, the main operation performed is to check whether the degree of the connector is equal to the degree of the corresponding position in gardening, which involves traversing all connectors with a complexity of $O(ConnectorNum)$.
+    - If the number of valid paths is equal to PathNum, all paths and related connector update operations will be traversed, with a complexity of $O(Total Pathnum)$.
+
+Therefore, the overall time complexity is roughly $O (2^{Total Pathnum}\times (ConnectorNum+Total Pathnum))$. This indicates that the time complexity of the algorithm is very high, especially when the number of paths increases.
+
+### Spatial complexity
+
+1. **Recursive stack**
+The maximum recursive depth is **TotalPathnum**, as each path may be processed once in recursion. Therefore, the spatial complexity of the recursive stack is $O(Total Pathnum)$.
+
+2. **Auxiliary space**
+The sizes of the connector array **connectors** and path array **paths** are **ConnectorNum** and **TotalPathnum**, respectively.
+The two-dimensional array **garden** is based on the size of garden diagram, which is $M \times N$.</br>
+Therefore, the overall spatial complexity is $O(Total Pathnum+m \times n+Connector Num)$, and considering the possible values of **Total Pathnum**, **m**, **n** and **Connector Num**, the spatial complexity is mainly influenced by the size of horticulture and the number of paths.
+
+### Comments
+
+1. **Complexity**
+    - This algorithm can work well for **small-scale** garden diagrams, but the **time complexity is high**, especially when the number of paths is large. Therefore, it is better to optimize the algorithm to reduce the time complexity, such as reducing the number of recursive calls or improving the efficiency of the recursive function.
+2. **Scalability**
+    - The algorithm can be applied to **different sizes of garden diagrams**, but the time complexity will increase with the increase of the number of paths.
 
