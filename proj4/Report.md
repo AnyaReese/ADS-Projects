@@ -42,26 +42,26 @@ We are going to solve the above question by **dynamic programming**. We will cla
 We use 2 2D arrays to store the number of trees with a black root and a red root, respectively. We also define some constants for the maximum number of nodes, a large prime for modulo operations, and the maximum height based on the possible maximum black height.
 
 1. **Constants**:
+
    - `NODES_MAX`: Maximum number of nodes
    - `OVERFLOW`: A large prime for modulo operations to prevent integer overflow
    - `HEIGHT_MAX`: Adjusted maximum height based on possible maximum black height
-
 2. **Global Variables**:
-    - `BlackDP`: A 2D array to store the count of trees with a black root, classified by number of nodes and black height. Rows represent the number of nodes, and columns represent the black height, and the value at each cell represents the number of distinct trees with a black root.
-    - `RedDP`: A 2D array to store the count of trees with a red root, classified by number of nodes and black height. Rows represent the number of nodes, and columns represent the black height, and the value at each cell represents the number of distinct trees with a red root.
+
+   - `BlackDP`: A 2D array to store the count of trees with a black root, classified by number of nodes and black height. Rows represent the number of nodes, and columns represent the black height, and the value at each cell represents the number of distinct trees with a black root.
+   - `RedDP`: A 2D array to store the count of trees with a red root, classified by number of nodes and black height. Rows represent the number of nodes, and columns represent the black height, and the value at each cell represents the number of distinct trees with a red root.
 
 > Though an actual Balck-Red Tree can't have a red root, we still need to consider the case of a red root in the dynamic programming process. This is because the **subtrees of a red root tree can have a black root**, and the black height of the left subtree and right subtree must be the same.
 
+```cpp
+// Constants
+const int NODES_MAX = 505;        // Maximum number of nodes
+const int OVER = 1000000007;  // A large prime for modulo operations to prevent integer overflow
+const int HEIGHT_MAX = 30;        // Adjusted maximum height based on possible maximum black height
 
-```python
-# Constants
-NODES_MAX = 505  # Maximum number of nodes
-OVERFLOW = 1000000007  # A large prime for modulo operations to prevent integer overflow
-HEIGHT_MAX = 30  # Adjusted maximum height based on possible maximum black height
-
-# Global variables for dynamic programming results
-BlackDP = [[0] * HEIGHT_MAX for _ in range(NODES_MAX)]  # Count of trees with a black root, classified by number of nodes and black height
-RedDP = [[0] * HEIGHT_MAX for _ in range(NODES_MAX)]    # Count of trees with a red root, classified by number of nodes and black height
+// Global variables for dynamic programming results
+vector<vector<long long> > BlackDP(NODES_MAX, vector<long long>(HEIGHT_MAX, 0)); // Count of trees with a black root
+vector<vector<long long> > RedDP(NODES_MAX, vector<long long>(HEIGHT_MAX, 0));   // Count of trees with a red root
 
 ```
 
@@ -72,34 +72,42 @@ RedDP = [[0] * HEIGHT_MAX for _ in range(NODES_MAX)]    # Count of trees with a 
 3. for each number of nodes, calculate the number of trees with a black root and a red root at the current black height
 4. calculate the final result by summing up the number of trees with a black root at all possible heights
 
-```python
-def main():
-    n = int(input("Enter the total number of nodes: "))  # Input total number of nodes
+```cpp
+int main() {
+    int n = 0;  // Input total number of nodes
+    cin >> n;
 
-    # Initialize base cases, root node don't count into BH, NIL count into BH
-    BlackDP[1][1] = 1  # 1 for node number, 1 for black height, 1 for distinct trees number
-    BlackDP[2][1] = 2  # 2 for node number, 1 for black height, 2 for distinct trees number
-    RedDP[1][1] = 1    # 1 for node number, 1 for black height, 1 for distinct trees number
+    // Initialize base cases, root node don't count into BH, NIL count into BH
+    BlackDP[1][1] = 1;  // 1 for node number, 1 for black height, 1 for distinct trees number
+    BlackDP[2][1] = 2;  // 2 for node number, 1 for black height, 2 for distinct trees number
+    RedDP[1][1] = 1;    // 1 for node number, 1 for black height, 1 for distinct trees number
 
-    # Dynamic programming to fill the table
-    for i in range(3, n + 1):
-        for j in range(int(math.log2(i + 1) / 2), int(math.log2(i + 1) * 2) + 1): # Iterate through all possible black heights
-            for k in range(1, i - 1):
-                # for each Black Root Tree, its subtrees can have 1 black root or 1 red root
-                # and the black height of left subtree and right subtree must be the same
-                BlackDP[i][j] = (BlackDP[i][j] + (((BlackDP[k][j - 1] + RedDP[k][j])
-                                                   * (BlackDP[i - 1 - k][j - 1] + RedDP[i - 1 - k][j])) % OVERFLOW)) % OVERFLOW
-                # for each Red Root Tree, its subtrees must have black root
-                # and the black height of left subtree and right subtree must be the same
-                RedDP[i][j] = (RedDP[i][j] + ((BlackDP[k][j - 1] * BlackDP[i - 1 - k][j - 1]) % OVERFLOW)) % OVERFLOW
+    // Dynamic programming to fill the table
+    for (int i = 3; i <= n; i++) {
+        for (int j = static_cast<int>(log2(i + 1) / 2); j <= static_cast<int>(log2(i + 1) * 2) + 1; j++) {
+            for (int k = 1; k < i; ++k) {
+                // For each Black Root Tree, its subtrees can have 1 black root or 1 red root
+                // And the black height of left subtree and right subtree must be the same
+                BlackDP[i][j] = (BlackDP[i][j] + (((BlackDP[k][j - 1] + RedDP[k][j]) *
+                                                   (BlackDP[i - 1 - k][j - 1] + RedDP[i - 1 - k][j])) % OVER)) % OVER;
+                // For each Red Root Tree, its subtrees must have black root
+                // And the black height of left subtree and right subtree must be the same
+                RedDP[i][j] = (RedDP[i][j] + ((BlackDP[k][j - 1] * BlackDP[i - 1 - k][j - 1]) % OVER)) % OVER;
+            }
+        }
+    }
 
-    # Calculate the final result for trees with a black root at all possible heights
-    totalTrees = 0
-    for i in range(HEIGHT_MAX):
-        totalTrees = (totalTrees + BlackDP[n][i]) % OVERFLOW
+    // Calculate the final result for trees with a black root at all possible heights
+    long long totalTrees = 0;
+    for (int i = 0; i < HEIGHT_MAX; i++) {
+        totalTrees = (totalTrees + BlackDP[n][i]) % OVER;
+    }
 
-    # Output the final result
-    print(totalTrees)
+    // Output the final result
+    cout << totalTrees << endl;
+
+    return 0;
+}
 ```
 
 ## Chapter3: Test cases
@@ -118,7 +126,7 @@ Output:
 8
 ```
 
-![alt text](image.png)
+![alt text](image-4.png)
 
 ### 3.2 Large Test Cases
 
@@ -134,7 +142,7 @@ Output:
 167844408
 ```
 
-![alt text](image-2.png)
+![alt text](image-5.png)
 
 Input:
 
@@ -148,7 +156,12 @@ Output:
 905984258
 ```
 
-![alt text](image-1.png)
+![alt text](image-6.png)
+
+### PTA TestCases
+
+![image.png](image-3.png)
+
 
 ## Chapter4: Analysis and Commnets
 
@@ -163,3 +176,5 @@ The **space complexity** of the dynamic programming solution is $O(N \log N)$, w
 ### 4.3 Comments
 
 The dynamic programming solution is an efficient way to solve the problem of counting the number of distinct red-black trees with a given number of internal nodes. By classifying the trees based on the number of nodes and black height, we can calculate the number of trees with a black root and a red root at each black height. The final result is obtained by summing up the number of trees with a black root at all possible heights. The time complexity of the solution is $O(N^2 \log N)$, and the space complexity is $O(N \log N)$.
+
+There's still room for improvement in the code. For example, we can use a more efficient way to calculate the logarithm of the number of nodes and optimize the modulo operations to prevent integer overflow. We can use FFT to speed up the multiplication of large numbers and reduce the time complexity of the solution. We can also optimize the space complexity by using a more compact data structure to store the dynamic programming results. The thought of optimization comes from PTA testcases when we failed to run it in time with python, though using cpp we can pass it with normal algorithm.
