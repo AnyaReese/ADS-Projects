@@ -102,7 +102,7 @@ struct MinHeapNode* CreateMinHeapNode(){
     MinHeap->data[0]->weight = -1;
     MinHeap->data[0]->Left = NULL;
     MinHeap->data[0]->Right = NULL;
-    // data[0]是不会被用到的，根从data[1]开始
+    // data[0] will never be used. start from data[1]
     return MinHeap;
 }
 struct HuffmanNode* CreateHuffmanNode(){
@@ -128,7 +128,7 @@ struct MinHeapNode* CreateMinHeapNode(){
     MinHeap->data[0]->weight = -1;
     MinHeap->data[0]->Left = NULL;
     MinHeap->data[0]->Right = NULL;
-    // data[0]是不会被用到的，根从data[1]开始
+    // data[0] will never be used. start from data[1]
     return MinHeap;
 }
 struct HuffmanNode* CreateHuffmanNode(){
@@ -153,9 +153,11 @@ void Insert(MinHeapNode* heap, HuffmanNode* node){
         k = k>>1;
     }
     heap->data[k] = node;
-    // node[k>>1] 是 node[k] 的父节点
-    // 如果要插入的值比他的父节点大，那么就插入到当前位置
-    // 否则继续往上找，移动父节点到当前节点位置。
+    // node[k>>1] is node[k] 's father node
+    // If the value to be inserted is greater than the value of the parent node,
+    // then insert it into the current position
+    // Else, continue to find the parent node and move the parent 
+    // node to the current node position.
 }
 ```
 
@@ -167,20 +169,22 @@ void Insert(MinHeapNode* heap, HuffmanNode* node){
 struct HuffmanNode* GetMinAndDelete(struct MinHeapNode* heap){
     struct HuffmanNode* Minterm = heap->data[1];
     struct HuffmanNode* temp = heap->data[heap->size --];
-    // 等于要把temp插入到新的树中的某一个位置
-    int parent = 1; // 从头开始找
+    // equals to insert temp into the new tree
+    int parent = 1; // Start from the root node
     while(parent * 2 <= heap->size){
         int Leftchild = parent * 2; 
         int Rightchild = parent * 2 + 1;
         int Smallerchild = Leftchild;
-        if(Leftchild != heap->size){        // 第一个条件表示如果当前节点还有右孩子
-            if(heap->data[Leftchild]->weight > heap->data[Rightchild]->weight) // 第二个条件表示如果左孩子的值比右孩子大
-                Smallerchild = Rightchild;  // 则把右孩子设置为更小的孩子
+        if(Leftchild != heap->size){ // If the current node has a right child
+            // If the left child is greater than the right child
+            if(heap->data[Leftchild]->weight > heap->data[Rightchild]->weight)
+                Smallerchild = Rightchild;  // Then the right child is the smaller child
         }    
-        if(temp->weight <= heap->data[Smallerchild]->weight)    // 如果要插入的值比当前节点小一些的孩子还小
-            break;  //即可插入到当前节点位置
-        else    
-            heap->data[parent] = heap->data[Smallerchild];      // 否则把更小的孩子替换到当前节点
+        // If the value to be inserted is less than the smaller child
+        if(temp->weight <= heap->data[Smallerchild]->weight)
+            break;  // Then the current node is in the correct position
+        else // Otherwise, move the smaller child to the parent node
+            heap->data[parent] = heap->data[Smallerchild];
         parent = Smallerchild;
     }
     heap->data[parent]=temp;
@@ -202,10 +206,10 @@ struct HuffmanNode* buildHuffman(struct MinHeapNode* heap){
         node->Right = GetMinAndDelete(heap);
         node->weight = node->Left->weight + node->Right->weight;
         Insert(heap, node);
-        // 将堆中的最小和次小融合成一个点放回堆中，每次点的总数减一
-        // 因此，经过size - 1次操作后一定会将size个点融合为一个点
+        // The number of nodes in the heap decreases by 1 each time
+        // Thus, the loop will run (times-1) times
     }
-    return GetMinAndDelete(heap);   // 那么最后剩下的就是我们要的霍夫曼树
+    return GetMinAndDelete(heap);   // Return the root node of the Huffman tree
 }
 ```
 
@@ -220,7 +224,7 @@ int WPL(struct HuffmanNode* node,int depth){
 }
 ```
 
-### Function: WPL
+### Function: judge
 
 ​	Validates each student's submitted encoding against the actual Huffman tree built from the input. It checks for correct encoding lengths, prefix conditions, and the total WPL.
 
@@ -237,7 +241,8 @@ bool judge(){
         cin >> ch >> code;
         pos = node; // Start from the root of the Huffman tree for each character
 
-        // If the code length is greater than or equal to the number of characters, it's automatically invalid
+        // If the code length is greater than or equal to the 
+        // number of characters, it's automatically invalid
         if(code.length() >= Char_num) flag = false;
         else if(flag){ 
             for(j=0;ch!=c[j];j++);
@@ -253,10 +258,12 @@ bool judge(){
                     if(pos->Right==NULL) pos->Right=CreateHuffmanNode();
                     pos = pos->Right; 
                 }
-                if(pos->weight != 0) flag = false; // If we reach a node that already has a weight, the code is not a valid prefix
+                if(pos->weight != 0) flag = false; // If we reach a node that already has a weight, 
+                // the code is not a valid prefix
             }
 
-            // After finishing the code, check if the node has children, which means it's not a leaf node
+            // After finishing the code, check if the node has children, 
+            // which means it's not a leaf node
             if(pos->Left || pos->Right) flag = false; // A valid leaf node shouldn't have children
             else pos->weight = fpos; // Set the weight at the leaf node
 
@@ -265,7 +272,8 @@ bool judge(){
         }
     }
 
-    // The calculated WPL must match the expected sum for the encoding to be considered correct
+    // The calculated WPL must match the expected sum for the 
+    // encoding to be considered correct
     if(sum_up != sum) flag = false;
     return flag;
 }
@@ -285,14 +293,14 @@ Analyzing the time complexity and space complexity of the `judge` function invol
 ### Time Complexity
 
 1.  **Initialization**:
-    -   Creating a new Huffman node takes constant time,$ O(1)$.
+    -   Creating a new Huffman node takes constant time,$O(1)$.
 2.  **Reading Input and Building Huffman Tree Simulation**:
     -   The loop runs `N` times, where `N` is the number of distinct characters (`Char_num`). Inside this loop:
         
-        -   Finding the index of character` ch` in array  ` c ` involves a linear search, which takes $O(N)$ in the worst case.
+        -   Finding the index of character `ch` in array  `c` involves a linear search, which takes $O(N)$ in the worst case.
         -   Traversing the length of the code for each character involves operations that can be considered $O(L)$, where $L$ is the average length of the code strings.
         -   Therefore, each character processing within the loop takes $O(N+L)$.
-    -   Thus, the nested operations within the loop make the overall complexity for this segment $ O(N×(N+L))$.
+    -   Thus, the nested operations within the loop make the overall complexity for this segment $O(N×(N+L))$.
     
 3.  **Final Check of Weighted Path Length (WPL)**:
     -   Comparing `sum_up` with `sum` takes constant time, $O(1)$.

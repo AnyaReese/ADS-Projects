@@ -1,4 +1,7 @@
-#include<bits/stdc++.h>
+#include <iostream>
+#include <string>
+#include <cstdlib>
+
 using namespace std;
 
 int Char_num, Test_num, f[70], sum;
