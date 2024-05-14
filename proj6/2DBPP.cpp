@@ -18,6 +18,8 @@ class Rectangle {
 public:
     double width;
     double height;
+    double x;
+    double y;
 };
 
 int n = 0;  // Input total number of bins
@@ -25,6 +27,10 @@ double given_width = 0; // Input width of the large bin
 
 double FFDH(vector<Rectangle>& recs);
 double NFDH(vector<Rectangle>& recs);
+double SAS(vector<Rectangle>& recs);
+double PackNarrow(vector<Rectangle>& narrow, double currentHeight);
+double PackWide(vector<Rectangle>& wide, double currentHeight);
+
 bool cmpBins(const Rectangle& a, const Rectangle& b) {
     return a.height > b.height;
 }
@@ -42,7 +48,7 @@ int main() {
         rects.push_back(rectangle);
     }
 
-    height = FFDH(rects);
+    height = SAS(rects);
 
     cout << "Height of the large bin: " << height << endl;
 
@@ -170,4 +176,72 @@ double NFDH(vector<Rectangle>& rects) {
 
     return height;
 }
+
+/**
+ * Input: The number of rectangles to be packed n, the dimensions of the rectangles ⟨w(Li ), h(Li )⟩
+ * and the strip width W .
+ * Output: The height H of the packing obtained in the strip.
+ * @author AnyaReese
+ * @param recs a vector of rectangles
+ * @return height
+ */
+double SAS(vector<Rectangle>& recs) {
+    vector<Rectangle> narrow;
+    vector<Rectangle> wide;
+
+    // Partition rectangles into narrow and wide
+    for (const auto& rec : recs) {
+        if (rec.width < rec.height) {
+            narrow.push_back(rec);
+        } else {
+            wide.push_back(rec);
+        }
+    }
+
+    // Sort by height to prioritize taller rectangles first
+    auto cmpHeight = [](const Rectangle& a, const Rectangle& b) { return a.height > b.height; };
+    sort(narrow.begin(), narrow.end(), cmpHeight);
+    sort(wide.begin(), wide.end(), cmpHeight);
+
+    double totalHeight = 0;
+
+    int level = 0;
+    double height_limit[n];
+    for (int i = 0; i < n; ++i) {
+        height_limit[i] = 0;
+    }
+    // Packing process
+    while (!narrow.empty() || !wide.empty()) {
+        if (!narrow.empty() && !wide.empty()) {
+
+        }
+    }
+
+}
+
+
+
+/**
+ *
+ * @param recs
+ * @param n_narrow
+ * @param current_width
+ * @param current_height
+ * @return
+ */
+double PackNarrow(vector<Rectangle>& narrow, double currentHeight) {
+
+}
+
+/**
+ * @param recs
+ * @param n_wide
+ * @param current_width
+ * @param current_height
+ * @return
+ */
+double PackWide(vector<Rectangle>& wide, double currentHeight) {
+
+}
+
 
