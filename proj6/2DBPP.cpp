@@ -36,6 +36,9 @@ void testTime(vector<Rectangle>& recs);
 bool cmpBins(const Rectangle& a, const Rectangle& b) {
     return a.height > b.height;
 }
+bool cmpBinsWid(const Rectangle& a, const Rectangle& b) {
+    return a.width > b.width;
+}
 
 int main() {
     cout << "Input the number of rectangles and the width of the large bin:\n";
@@ -221,8 +224,9 @@ double SAS(vector<Rectangle>& recs) {
 
     // Sort by height to prioritize taller rectangles first
     auto cmpHeight = [](const Rectangle& a, const Rectangle& b) { return a.height > b.height; };
+    auto cmpWide = [](const Rectangle& a, const Rectangle& b) { return a.width > b.width; };
     sort(narrow.begin(), narrow.end(), cmpHeight);
-    sort(wide.begin(), wide.end(), cmpHeight);
+    sort(wide.begin(), wide.end(), cmpWide);
 
     double current_x = 0, current_y = 0;
 
@@ -339,5 +343,3 @@ void PackWide(vector<Rectangle>& narrow, vector<Rectangle>& wide, double x1, dou
         PackNarrow(narrow, wide, x1, y1, x_limit, y_limit);
     }
 }
-
-

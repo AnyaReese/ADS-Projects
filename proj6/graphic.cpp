@@ -167,3 +167,77 @@ void MainWindow::packNarrow(int x1, int y1, int x2, int y2) {
     }
     return;
 }
+
+void MainWindow::packNarrow2(int x1, int y1, int x2, int y2) {
+    if (narrow.size()) {
+        // pack first narrow rectangle that
+        // fits height-wise and width-wise
+        int i;
+        for (i = 0; i < narrow.size(); i++) {
+            if (x2 - x1 >= narrow[i].width
+                && y2 - y1 >= narrow[i].height)
+                break;
+        }
+        // if running out of narrow, then return
+        if(i == narrow.size())
+            return;
+        narrow[i].x = x1;
+        narrow[i].y = y1;
+        list.push_back(narrow[i]);
+        int deltax = narrow[i].width;
+        int deltay = narrow[i].height;
+        narrow.erase(narrow.begin() + i);
+        // call itself to fill the remaining space on the
+        // top of the packed rectangle and on the right of
+        // the packed rectangle
+        packNarrow2(x1, y1 + deltay, x1 + deltax, y2);
+        packNarrow2(x1 + deltax, y1, x2, y2);
+    }
+        // if running out of narrow rectangle,
+        // we can fill the remaining space with wide rectangles
+        // in SAS_advanced algorithm
+    else if (algoNum == 3) {
+        packWide2(x1, y1, x2, y2);
+    }
+}
+
+// packWide2 subroutine only for SAS_advanced algorithm
+//
+void MainWindow::packWide2(int x1, int y1, int x2, int y2) {
+    if (wide.size() && x2 - x1 >= wide.back().width) {
+        int j;
+        // choose the first rectangle from wide
+        // that can fit both wide-wise and height-wise
+        for (j = 0; j < wide.size(); j++)
+            if (x2 - x1 >= wide[j].width)
+                break;
+        if (j == wide.size())
+            return;
+
+        int start;
+        for (start = j; start < wide.size(); start++) {
+            if (y2 - y1 >= wide[start].height)
+                break;
+        }
+        if (start == wide.size())
+            return;
+
+        j = start;
+        int x3 = wide[j].width + x1;
+        int y3 = y1;
+        // while existing rectangles that can fit height-wise
+        while (j != wide.size() && y2 - y1 >= wide[j].height) {
+            wide[j].x = x1;
+            wide[j].y = y1;
+            y1 += wide[j].height;
+            list.push_back(wide[j]);
+            wide.erase(wide.begin() + j);
+        }
+        // recursively call packWide2 for fill the
+        // remaining space that are on the right-hand side
+        packWide2(x3, y3, x2, y2);
+    }
+    return;
+}
+
+
