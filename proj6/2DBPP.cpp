@@ -1,7 +1,7 @@
 #include <iostream>
 #include <vector>
 
-#define enableLog 0 // Enable log
+#define enableLog 1 // Enable log
 
 /**
  * Texture Packing is to pack multiple rectangle shaped textures into one large texture.
@@ -14,17 +14,18 @@
 
 using namespace std;
 
+/** Classes **/
 class Rectangle {
 public:
     double width;
     double height;
-    double x;
-    double y;
 };
 
+/** Global Variables **/
 int n = 0;  // Input total number of bins
 double given_width = 0; // Input width of the large bin
 
+/** Functions **/
 double FFDH(vector<Rectangle>& recs);
 double NFDH(vector<Rectangle>& recs);
 double SAS(vector<Rectangle>& recs);
@@ -189,6 +190,10 @@ double SAS(vector<Rectangle>& recs) {
     vector<Rectangle> narrow;
     vector<Rectangle> wide;
 
+    if (enableLog) {
+        cout << "\e[33m[Info]: Using SAS\e[0m" << endl;
+    }
+
     // Partition rectangles into narrow and wide
     for (const auto& rec : recs) {
         if (rec.width < rec.height) {
@@ -215,12 +220,18 @@ double SAS(vector<Rectangle>& recs) {
                 current_x = narrow[0].width;
                 current_y = height_limit;
                 height_limit += narrow[0].height;
+                if (enableLog) {
+                    cout << "\e[32mHeight Changed By Narrow Rectangle whose height is: " << narrow[0].height << "\e[0m" << endl;
+                }
                 narrow.erase(narrow.begin());
             } else { // wide[0].height >= narrow[0].height
                 init_with_wide = true;
                 current_x = wide[0].width;
                 current_y = height_limit;
                 height_limit += wide[0].height;
+                if (enableLog) {
+                    cout << "\e[32mHeight Changed By Wide Rectangle whose height is: " << wide[0].height << "\e[0m" << endl;
+                }
                 wide.erase(wide.begin());
             }
         } else if (!narrow.empty()) {
@@ -228,12 +239,18 @@ double SAS(vector<Rectangle>& recs) {
             current_x = narrow[0].width;
             current_y = height_limit;
             height_limit += narrow[0].height;
+            if (enableLog) {
+                cout << "\e[32mHeight Changed By Narrow Rectangle whose height is: " << narrow[0].height << "\e[0m" << endl;
+            }
             narrow.erase(narrow.begin());
         } else { // wide.size()
             init_with_wide = true;
             current_x = wide[0].width;
             current_y = height_limit;
             height_limit += wide[0].height;
+            if (enableLog) {
+                cout << "\e[32mHeight Changed By Wide Rectangle whose height is: " << wide[0].height << "\e[0m" << endl;
+            }
             wide.erase(wide.begin());
         } /* end of Initialization Narrow or Wide */
 
@@ -267,6 +284,9 @@ void PackNarrow(vector<Rectangle>& narrow, vector<Rectangle>& wide, double x1, d
                 curr_Y1 += narrow[0].height;
                 narrow.erase(narrow.begin());
             }
+            if (enableLog) {
+                cout << "Packing narrow at (" << curr_X1 << ", " << curr_Y1 << ")" << endl;
+            }
             curr_X1 += baseWidth;
             curr_Y1 = y1;
         }
@@ -288,6 +308,9 @@ void PackWide(vector<Rectangle>& narrow, vector<Rectangle>& wide, double x1, dou
                 // if rectangle fits wide-wise
                 if ((x1 + wide[i].width <= x_limit) && (x_limit != given_width)) {
                     PackNarrow(narrow, wide, x1 + wide[i].width, y1, x_limit, y_limit);
+                }
+                if (enableLog) {
+                    cout << "Packing wide at (" << x1 << ", " << y1 << ")" << endl;
                 }
                 x_limit = x1 + wide[i].width;
                 y1 += wide[i].height;
