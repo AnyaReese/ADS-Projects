@@ -1,0 +1,10 @@
+Number of rectangles: 615, Time elapsed: 0.018047094345092773, Approximation ratio: 1.205
+Number of rectangles: 796, Time elapsed: 0.01604175567626953, Approximation ratio: 1.1475
+Number of rectangles: 57, Time elapsed: 0.03509354591369629, Approximation ratio: 1.4433333333333334
+Number of rectangles: 63, Time elapsed: 0.014011859893798828, Approximation ratio: 1.385
+Number of rectangles: 62, Time elapsed: 0.01601696014404297, Approximation ratio: 1.456
+Number of rectangles: 56, Time elapsed: 0.020053386688232422, Approximation ratio: 1.4183333333333332
+Number of rectangles: 58, Time elapsed: 0.034089088439941406, Approximation ratio: 1.5757142857142856
+Number of rectangles: 79, Time elapsed: 0.01755213737487793, Approximation ratio: 1.29125
+Number of rectangles: 71, Time elapsed: 0.02105402946472168, Approximation ratio: 1.5133333333333334
+Number of rectangles: 87, Time elapsed: 0.0200350284576416, Approximation ratio: 1.342

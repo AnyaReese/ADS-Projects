@@ -1,0 +1,11 @@
+Number of rectangles: 10, Time elapsed: 0.011037588119506836 seconds
+Number of rectangles: 1010, Time elapsed: 0.011028528213500977 seconds
+Number of rectangles: 2010, Time elapsed: 0.015039443969726562 seconds
+Number of rectangles: 3010, Time elapsed: 0.02001047134399414 seconds
+Number of rectangles: 4010, Time elapsed: 0.02012920379638672 seconds
+Number of rectangles: 5010, Time elapsed: 0.03609442710876465 seconds
+Number of rectangles: 6010, Time elapsed: 0.04411482810974121 seconds
+Number of rectangles: 7010, Time elapsed: 0.03910207748413086 seconds
+Number of rectangles: 8010, Time elapsed: 0.07118630409240723 seconds
+Number of rectangles: 9010, Time elapsed: 0.08121252059936523 seconds
+Number of rectangles: 10010, Time elapsed: 0.10326957702636719 seconds

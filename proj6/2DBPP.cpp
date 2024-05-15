@@ -28,8 +28,8 @@ double given_width = 0; // Input width of the large bin
 double FFDH(vector<Rectangle>& recs);
 double NFDH(vector<Rectangle>& recs);
 double SAS(vector<Rectangle>& recs);
-double PackNarrow(vector<Rectangle>& narrow, double currentHeight);
-double PackWide(vector<Rectangle>& wide, double currentHeight);
+void PackNarrow(vector<Rectangle>& narrow, vector<Rectangle>& wide, double x1, double y1, double x_limit, double y_limit);
+void PackWide(vector<Rectangle>& narrow, vector<Rectangle>& wide, double x1, double y1, double x_limit, double y_limit);
 
 bool cmpBins(const Rectangle& a, const Rectangle& b) {
     return a.height > b.height;
@@ -203,20 +203,55 @@ double SAS(vector<Rectangle>& recs) {
     sort(narrow.begin(), narrow.end(), cmpHeight);
     sort(wide.begin(), wide.end(), cmpHeight);
 
-    double totalHeight = 0;
+    double current_x = 0, current_y = 0;
 
-    int level = 0;
-    double height_limit[n];
-    for (int i = 0; i < n; ++i) {
-        height_limit[i] = 0;
-    }
+    bool init_with_wide = 0;
+    double height_limit = 0;
     // Packing process
     while (!narrow.empty() || !wide.empty()) {
         if (!narrow.empty() && !wide.empty()) {
+            if (narrow[0].height > wide[0].height) {
+                init_with_wide = 0;
+                narrow[0].x = 0;
+                narrow[0].y = height_limit;
+                current_x = narrow[0].width;
+                current_y = height_limit;
+                height_limit += narrow[0].height;
+                narrow.erase(narrow.begin());
+            } else { // wide[0].height >= narrow[0].height
+                init_with_wide = 1;
+                wide[0].x = 0;
+                wide[0].y = height_limit;
+                current_x = wide[0].width;
+                current_y = height_limit;
+                height_limit += wide[0].height;
+                wide.erase(wide.begin());
+            }
+        } else if (!narrow.empty()) {
+            init_with_wide = 0;
+            narrow[0].x = 0;
+            narrow[0].y = height_limit;
+            current_x = narrow[0].width;
+            current_y = height_limit;
+            height_limit += narrow[0].height;
+            narrow.erase(narrow.begin());
+        } else { // wide.size()
+            init_with_wide = 1;
+            wide[0].x = 0;
+            wide[0].y = height_limit;
+            current_x = wide[0].width;
+            current_y = height_limit;
+            height_limit += wide[0].height;
+            wide.erase(wide.begin());
+        } /* end of Initialization Narrow or Wide */
 
+        if (init_with_wide) { // Pack Narrow
+            PackNarrow(narrow, wide, current_x, current_y, given_width, height_limit);
+        } else { // Pack Wide
+            PackWide(narrow, wide, current_x, current_y, given_width, height_limit);
         }
     }
-
+    return height_limit;
 }
 
 
@@ -229,9 +264,26 @@ double SAS(vector<Rectangle>& recs) {
  * @param current_height
  * @return
  */
-double PackNarrow(vector<Rectangle>& narrow, double currentHeight) {
-
+void PackNarrow(vector<Rectangle>& narrow, vector<Rectangle>& wide, double x1, double y1, double x_limit, double y_limit) {
+    if (!narrow.empty()) {
+        double baseWidth;
+        double curr_X1 = x1;
+        double curr_Y1 = y1;
+        while (!narrow.empty() && (curr_X1 + narrow[0].width <= x_limit)) {
+            baseWidth = narrow[0].width;
+            while (!narrow.empty() && (curr_Y1 + narrow[0].height <= y_limit) && (narrow[0].width <= baseWidth)) {
+                narrow[0].x = curr_X1;
+                narrow[0].y = curr_Y1;
+                curr_Y1 += narrow[0].height;
+                narrow.erase(narrow.begin());
+            }
+            curr_X1 += baseWidth;
+            curr_Y1 = y1;
+        }
+    }
+    return;
 }
+
 
 /**
  * @param recs
@@ -240,8 +292,24 @@ double PackNarrow(vector<Rectangle>& narrow, double currentHeight) {
  * @param current_height
  * @return
  */
-double PackWide(vector<Rectangle>& wide, double currentHeight) {
-
+void PackWide(vector<Rectangle>& narrow, vector<Rectangle>& wide, double x1, double y1, double x_limit, double y_limit) {
+    if (!wide.empty() && (x1 + wide[0].width <= x_limit)) {
+        for (int i = 0; i < wide.size(); i++) { // traverse each wide
+            // if rectangle fits wide-wise and height-wise
+            if (y1 + wide[i].height <= y_limit) {
+                wide[i].x = x1;
+                wide[i].y = y1;
+                // if rectangle fits wide-wise
+                if ((x1 + wide[i].width <= x_limit) && (x_limit != given_width)) {
+                    PackNarrow(narrow, wide, x1 + wide[i].width, y1, x_limit, y_limit);
+                }
+                x_limit = x1 + wide[i].width;
+                y1 += wide[i].height;
+                wide.erase(wide.begin() + i);
+                i--;
+            } /* end of this wide[i] */
+        }
+    }
 }
 
 

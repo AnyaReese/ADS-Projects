@@ -23,7 +23,7 @@ void MainWindow::SAS() {
 
     // following are some useful local variables when processing
     int currentX1, currentY1;
-    int flag;
+    int flag; //
     int actualHeight = 0;	// also it's the height we have achieved
 
     while ( narrow.size() || wide.size() ) {
@@ -128,19 +128,11 @@ void MainWindow::packWide(int x1, int y1, int x2, int y2) {
                 if (x2 - (x1 + wide[j].width) > 0)
                     if(x2 != fixedWidth && algoNum == 2)
                         packNarrow(x1 + wide[j].width, y1, x2, y2);
-                    else if(algoNum == 3){
-                        packNarrow2(x1 + wide[j].width, y1, x2, y2);
-                    }
+
                 x2 = x1 + wide[j].width;
                 y1 += wide[j].height;
                 wide.erase(wide.begin() + j);
                 j--;
-            }
-                // In SAS_advanced algorithm, if wide are running out of
-                // rectangles, we can pack the narrow rectangles in the
-                // remaining space
-            else if (algoNum == 3) {
-                packNarrow(x1, y1, x2, y2);
             }
         }
     }

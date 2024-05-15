@@ -1,0 +1,11 @@
+Number of rectangles: 10, Approximation ratio: 1.5225563909774436
+Number of rectangles: 1010, Approximation ratio: 1.2309384836353634
+Number of rectangles: 2010, Approximation ratio: 1.1929243918897208
+Number of rectangles: 3010, Approximation ratio: 1.19570021467357
+Number of rectangles: 4010, Approximation ratio: 1.2650260631873371
+Number of rectangles: 5010, Approximation ratio: 1.3465095297169278
+Number of rectangles: 6010, Approximation ratio: 1.2030533391970848
+Number of rectangles: 7010, Approximation ratio: 1.1678365522223282
+Number of rectangles: 8010, Approximation ratio: 1.1129993799977744
+Number of rectangles: 9010, Approximation ratio: 1.2210684830762226
+Number of rectangles: 10010, Approximation ratio: 1.1088842328804784
