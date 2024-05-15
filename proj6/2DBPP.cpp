@@ -286,11 +286,8 @@ double SAS(vector<Rectangle>& recs) {
 
 
 /**
- *
- * @param recs
- * @param n_narrow
- * @param current_width
- * @param current_height
+ * Pack Narrow
+ * Traverse each narrow, if it fits narrow-wise and height-wise, pack it.
  * @return
  */
 void PackNarrow(vector<Rectangle>& narrow, vector<Rectangle>& wide, double x1, double y1, double x_limit, double y_limit) {
@@ -314,10 +311,9 @@ void PackNarrow(vector<Rectangle>& narrow, vector<Rectangle>& wide, double x1, d
 }
 
 /**
- * @param recs
- * @param n_wide
- * @param current_width
- * @param current_height
+ * Pack Wide
+ * Traverse each wide, if it fits wide-wise and height-wise, pack it.
+ * If no wide fits but narrows spare, pack narrow.
  * @return
  */
 void PackWide(vector<Rectangle>& narrow, vector<Rectangle>& wide, double x1, double y1, double x_limit, double y_limit) {
