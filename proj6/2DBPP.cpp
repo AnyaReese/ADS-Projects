@@ -1,5 +1,7 @@
 #include <iostream>
+#include <random>
 #include <vector>
+#include <algorithm>
 
 #define enableLog 0 // Enable log
 
@@ -17,6 +19,8 @@ using namespace std;
 /** Classes **/
 class Rectangle {
 public:
+    double x;
+    double y;
     double width;
     double height;
 };
@@ -26,6 +30,8 @@ int n = 0;  // Input total number of bins
 double given_width = 0; // Input width of the large bin
 
 /** Functions **/
+double SP(vector<Rectangle>& recs);
+double Sleator(vector<Rectangle>& recs);
 double FFDH(vector<Rectangle>& recs);
 double NFDH(vector<Rectangle>& recs);
 double SAS(vector<Rectangle>& recs);
@@ -68,10 +74,14 @@ void testTime(vector<Rectangle>& rects) {
     start_NFDH = clock();
     double height_NFDH = NFDH(rects);
     end_NFDH = clock();
+    double height_Sleator = Sleator(rects);
+    double heigh_SP = SP(rects);
 
     cout << "Height of the packing obtained in the strip using SAS: " << height_SAS << ", takes " << (double)(end_SAS - start_SAS) / CLOCKS_PER_SEC << " seconds" << endl;
     cout << "Height of the packing obtained in the strip using FFDH: " << height_FFDH << ", takes " << (double)(end_FFDH - start_FFDH) / CLOCKS_PER_SEC << " seconds" << endl;
     cout << "Height of the packing obtained in the strip using NFDH: " << height_NFDH << ", takes " << (double)(end_NFDH - start_NFDH) / CLOCKS_PER_SEC << " seconds" << endl;
+    cout << "Height of the packing obtained in the strip using Sleator: " << height_Sleator << endl;
+    cout << "Height of the packing obtained in the strip using SP: " << heigh_SP << endl;
 }
 
 /**
@@ -283,8 +293,6 @@ double SAS(vector<Rectangle>& recs) {
     return height_limit;
 }
 
-
-
 /**
  * Pack Narrow
  * Traverse each narrow, if it fits narrow-wise and height-wise, pack it.
@@ -339,3 +347,137 @@ void PackWide(vector<Rectangle>& narrow, vector<Rectangle>& wide, double x1, dou
         PackNarrow(narrow, wide, x1, y1, x_limit, y_limit);
     }
 }
+
+double Sleator(vector<Rectangle>& recs) {
+    int n = recs.size();
+    vector<Rectangle> groupA;
+    vector<Rectangle> groupB;
+
+    // Divide the rectangles into two groups based on their width
+    for (const auto& rect : recs) {
+        if (2 * rect.width > given_width)
+            groupA.push_back(rect);  // Group A: width is greater than half of the strip width
+        else
+            groupB.push_back(rect);  // Group B: width is less than or equal to half of the strip width
+    }
+
+    // Randomly shuffle items in Group A
+    shuffle(groupA.begin(), groupA.end(), std::mt19937(std::random_device()()));
+
+    vector<Rectangle> placements;  // To store the placement info, but not necessary for height calculation
+
+    double currentHeight = 0;
+    double maxWidth = 0;
+
+    // Place items from Group A vertically at the left side of the strip
+    for (const auto& rect : groupA) {
+        placements.push_back({0, currentHeight, rect.width, rect.height});  // Simplified storage, assumes placement at x=0
+        currentHeight += rect.height;
+    }
+
+    // Sort items in Group B in non-increasing order of height
+    sort(groupB.begin(), groupB.end(), [](const Rectangle& a, const Rectangle& b) {
+        return a.height > b.height;
+    });
+
+    double lowerHeight = currentHeight, upperHeight = currentHeight;  // Track heights at lower and upper ends
+
+    // Place items from Group B horizontally at the bottom or top of the strip
+    for (size_t i = 0; i < groupB.size();) {
+        double currentWidth = groupB[i].width;
+        double maxHeight = groupB[i].height;
+        size_t j = i;
+        while (j + 1 < groupB.size() && 2 * (groupB[j + 1].width + currentWidth) <= given_width) {
+            currentWidth += groupB[j + 1].width;
+            maxHeight = max(maxHeight, groupB[j + 1].height);
+            j++;
+        }
+
+        if (lowerHeight <= upperHeight) {
+            double x = 0;
+            for (size_t k = i; k <= j; ++k) {
+                placements.push_back({x, lowerHeight, groupB[k].width, groupB[k].height});
+                x += groupB[k].width;
+            }
+            lowerHeight += maxHeight;
+        } else {
+            double x = given_width / 2;  // Adjust this if you want a different placement
+            for (size_t k = i; k <= j; ++k) {
+                placements.push_back({x, upperHeight, groupB[k].width, groupB[k].height});
+                x += groupB[k].width;
+            }
+            upperHeight += maxHeight;
+        }
+
+        i = j + 1;  // Move to the next block of items
+    }
+
+    return max(lowerHeight, upperHeight);
+}
+
+class Strip {
+public:
+    double xposition;   // X position where this strip starts
+    double yposition;   // Y position where this strip starts
+    double itemWidth;   // Width of the item occupying this strip
+    double width;       // Total width of the strip
+    double lower;       // Lower bound Y of the unoccupied space in the strip
+    double upper;       // Upper bound Y of the occupied space in the strip
+};
+
+// Comparator for sorting rectangles by width and height
+bool cmp(const Rectangle& a, const Rectangle& b) {
+    if (a.width == b.width) return a.height > b.height;
+    return a.width > b.width;
+}
+
+
+double SP(vector<Rectangle>& recs) {
+    double W = given_width; //
+
+    sort(recs.begin(), recs.end(), cmp);
+
+    vector<Strip> strips;
+    strips.emplace_back(Strip{0, 0, W, 0, W, 0}); // Initialize the first strip
+
+    int cnt = 1;
+
+    for (int i = 0; i < n; i++) { // Traverse each rectangle
+        int fd = 0; // Find the first strip that can accommodate the rectangle
+        for (int j = 1; j <= cnt; j++) { // Traverse each strip
+            if (strips[j-1].width - strips[j-1].itemWidth >= recs[i].width) { // Check if the strip can accommodate the rectangle
+                if (!fd || strips[fd-1].width > strips[j-1].width) {
+                    fd = j; // Update the first strip that can accommodate the rectangle
+                }
+            }
+        }
+
+        if (!fd) {
+            // Find the lowest upper bound
+            for (int j = 1; j <= cnt; j++) {
+                if (!fd || strips[fd-1].upper > strips[j-1].upper) fd = j;
+            }
+            strips[fd-1].upper += recs[i].height;
+            strips[fd-1].itemWidth = recs[i].width;
+        } else {
+            // Suitable strip found, place the item
+
+            Strip s1 = {strips[fd-1].xposition, strips[fd-1].upper, strips[fd-1].itemWidth, 0, strips[fd-1].upper, strips[fd-1].upper};
+            Strip s2 = {strips[fd-1].xposition + strips[fd-1].itemWidth, strips[fd-1].lower, strips[fd-1].width - strips[fd-1].itemWidth, recs[i].height, strips[fd-1].itemWidth, recs[i].width};
+
+            // Adjust strips
+            strips.erase(strips.begin() + fd - 1);
+            strips.push_back(s1);
+            strips.push_back(s2);
+            cnt++;
+        }
+    }
+
+    // Calculate and return the maximum height used
+    double maxHeight = 0;
+    for (auto& strip : strips) {
+        maxHeight = max(maxHeight, strip.upper);
+    }
+    return maxHeight;
+}
+
