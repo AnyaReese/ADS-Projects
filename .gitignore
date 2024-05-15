@@ -83,6 +83,7 @@ dkms.conf
 **/.idea/**/usage.statistics.xml
 **/.idea/**/dictionaries
 **/.idea/**/shelf
+**/AnyaReference/
 
 # AWS User-specific
 **/.idea/**/aws.xml
@@ -513,7 +514,7 @@ dmypy.json
 # pytype static type analyzer
 .pytype/
 
-# Cython debug symbols
+# Cython enableLog symbols
 cython_debug/
 
 # PyCharm

@@ -1,3 +1,0 @@
-Number of rectangles: 16, Time elapsed: 0.009649038314819336, Approximation ratio: 1.173913043478261
-Number of rectangles: 23, Time elapsed: 0.011028766632080078, Approximation ratio: 1.3174603174603174
-Number of rectangles: 62, Time elapsed: 0.010974884033203125, Approximation ratio: 1.0628930817610063
