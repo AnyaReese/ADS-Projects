@@ -1,7 +1,7 @@
 #include <iostream>
 #include <vector>
 
-#define enableLog 1 // Enable log
+#define enableLog 0 // Enable log
 
 /**
  * Texture Packing is to pack multiple rectangle shaped textures into one large texture.
@@ -31,13 +31,13 @@ double NFDH(vector<Rectangle>& recs);
 double SAS(vector<Rectangle>& recs);
 void PackNarrow(vector<Rectangle>& narrow, vector<Rectangle>& wide, double x1, double y1, double x_limit, double y_limit);
 void PackWide(vector<Rectangle>& narrow, vector<Rectangle>& wide, double x1, double y1, double x_limit, double y_limit);
+void testTime(vector<Rectangle>& recs);
 
 bool cmpBins(const Rectangle& a, const Rectangle& b) {
     return a.height > b.height;
 }
 
 int main() {
-    double height = 0; // output
     cout << "Input the number of rectangles and the width of the large bin:\n";
     cin >> n >> given_width;
 
@@ -49,10 +49,26 @@ int main() {
         rects.push_back(rectangle);
     }
 
-    height = SAS(rects);
+    testTime(rects);
 
-    cout << "Height of the large bin: " << height << endl;
+}
 
+void testTime(vector<Rectangle>& rects) {
+    // calculate time
+    clock_t start_SAS, end_SAS, start_FFDH, end_FFDH, start_NFDH, end_NFDH;
+    start_SAS = clock();
+    double height_SAS = SAS(rects);
+    end_SAS = clock();
+    start_FFDH = clock();
+    double height_FFDH = FFDH(rects);
+    end_FFDH = clock();
+    start_NFDH = clock();
+    double height_NFDH = NFDH(rects);
+    end_NFDH = clock();
+
+    cout << "Height of the packing obtained in the strip using SAS: " << height_SAS << ", takes " << (double)(end_SAS - start_SAS) / CLOCKS_PER_SEC << " seconds" << endl;
+    cout << "Height of the packing obtained in the strip using FFDH: " << height_FFDH << ", takes " << (double)(end_FFDH - start_FFDH) / CLOCKS_PER_SEC << " seconds" << endl;
+    cout << "Height of the packing obtained in the strip using NFDH: " << height_NFDH << ", takes " << (double)(end_NFDH - start_NFDH) / CLOCKS_PER_SEC << " seconds" << endl;
 }
 
 /**
