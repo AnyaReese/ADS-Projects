@@ -349,33 +349,27 @@ void PackWide(vector<Rectangle>& narrow, vector<Rectangle>& wide, double x1, dou
 }
 
 double Sleator(vector<Rectangle>& recs) {
-    int n = recs.size();
     vector<Rectangle> groupA;
     vector<Rectangle> groupB;
 
     // Divide the rectangles into two groups based on their width
     for (const auto& rect : recs) {
-        if (2 * rect.width > given_width)
+        if (2 * rect.width > given_width) {
             groupA.push_back(rect);  // Group A: width is greater than half of the strip width
-        else
+        } else {
             groupB.push_back(rect);  // Group B: width is less than or equal to half of the strip width
+        }
     }
 
-    // Randomly shuffle items in Group A
-    shuffle(groupA.begin(), groupA.end(), std::mt19937(std::random_device()()));
-
-    vector<Rectangle> placements;  // To store the placement info, but not necessary for height calculation
 
     double currentHeight = 0;
-    double maxWidth = 0;
 
     // Place items from Group A vertically at the left side of the strip
     for (const auto& rect : groupA) {
-        placements.push_back({0, currentHeight, rect.width, rect.height});  // Simplified storage, assumes placement at x=0
         currentHeight += rect.height;
     }
 
-    // Sort items in Group B in non-increasing order of height
+    // Sort items in Group B in decreasing order of height
     sort(groupB.begin(), groupB.end(), [](const Rectangle& a, const Rectangle& b) {
         return a.height > b.height;
     });
@@ -386,26 +380,19 @@ double Sleator(vector<Rectangle>& recs) {
     for (size_t i = 0; i < groupB.size();) {
         double currentWidth = groupB[i].width;
         double maxHeight = groupB[i].height;
-        size_t j = i;
+        size_t j = i; // Index of the last item placed horizontally
+
+        // Find the maximum height that can be achieved by placing items horizontally
         while (j + 1 < groupB.size() && 2 * (groupB[j + 1].width + currentWidth) <= given_width) {
             currentWidth += groupB[j + 1].width;
             maxHeight = max(maxHeight, groupB[j + 1].height);
             j++;
         }
 
+        // Place the items horizontally at the lower or upper end of the strip
         if (lowerHeight <= upperHeight) {
-            double x = 0;
-            for (size_t k = i; k <= j; ++k) {
-                placements.push_back({x, lowerHeight, groupB[k].width, groupB[k].height});
-                x += groupB[k].width;
-            }
             lowerHeight += maxHeight;
         } else {
-            double x = given_width / 2;  // Adjust this if you want a different placement
-            for (size_t k = i; k <= j; ++k) {
-                placements.push_back({x, upperHeight, groupB[k].width, groupB[k].height});
-                x += groupB[k].width;
-            }
             upperHeight += maxHeight;
         }
 
