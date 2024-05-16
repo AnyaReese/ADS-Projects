@@ -64,7 +64,7 @@ int main() {
 
 void testTime(vector<Rectangle>& rects) {
     // calculate time
-    clock_t start_SAS, end_SAS, start_FFDH, end_FFDH, start_NFDH, end_NFDH;
+    clock_t start_SAS, end_SAS, start_FFDH, end_FFDH, start_NFDH, end_NFDH, start_Sleator, end_Sleator, start_SP, end_SP;
     start_SAS = clock();
     double height_SAS = SAS(rects);
     end_SAS = clock();
@@ -74,14 +74,18 @@ void testTime(vector<Rectangle>& rects) {
     start_NFDH = clock();
     double height_NFDH = NFDH(rects);
     end_NFDH = clock();
+    start_Sleator = clock();
     double height_Sleator = Sleator(rects);
+    end_Sleator = clock();
+    start_SP = clock();
     double heigh_SP = SP(rects);
+    end_SP = clock();
 
     cout << "Height of the packing obtained in the strip using SAS: " << height_SAS << ", takes " << (double)(end_SAS - start_SAS) / CLOCKS_PER_SEC << " seconds" << endl;
     cout << "Height of the packing obtained in the strip using FFDH: " << height_FFDH << ", takes " << (double)(end_FFDH - start_FFDH) / CLOCKS_PER_SEC << " seconds" << endl;
     cout << "Height of the packing obtained in the strip using NFDH: " << height_NFDH << ", takes " << (double)(end_NFDH - start_NFDH) / CLOCKS_PER_SEC << " seconds" << endl;
-    cout << "Height of the packing obtained in the strip using Sleator: " << height_Sleator << endl;
-    cout << "Height of the packing obtained in the strip using SP: " << heigh_SP << endl;
+    cout << "Height of the packing obtained in the strip using Sleator: " << height_Sleator << ", takes " << (double)(end_Sleator - start_Sleator) / CLOCKS_PER_SEC << " seconds" << endl;
+    cout << "Height of the packing obtained in the strip using SP: " << heigh_SP << ", takes " << (double)(end_SP - start_SP) / CLOCKS_PER_SEC << " seconds" << endl;
 }
 
 /**
