@@ -39,7 +39,7 @@ def square_case():
 
 
 def large_case():
-    max_rectangles = 1000
+    max_rectangles = 10000
     max_height = 100
     # 确保给定的容器宽度足够大，可以容纳至少一个矩形
     given_width = random.randint(50, 100)

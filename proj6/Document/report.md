@@ -40,27 +40,47 @@ body, pre {
 
 ​	We employs multiple algorithms to tackle the texture packing problem, where the objective is to pack a given number of rectangles into a large bin of fixed width while minimizing the height. Each algorithm utilizes a distinct approach to achieve this goal. Here is a detailed explanation of the problem-solving strategies for each algorithm:
 
-##### 1. **First Fit Decreasing Height (FFDH)**
+##### 1. **Next Fit Decreasing Height (NFDH)**
+**Solution Approach:**
+
+- **Sorting**: Similar to FFDH, the rectangles are sorted in decreasing order of height.
+- **Packing Strategy**: The algorithm places each rectangle into the current bin (row) if it fits. If the rectangle does not fit in the current bin, a new bin is created, and the rectangle is placed in this new bin.
+- **Advantages**: This approach reduces the complexity of checking multiple bins for space, as it only considers the current bin, making it faster but potentially less space-efficient than FFDH.
+
+##### 2. **First Fit Decreasing Height (FFDH)**
 **Solution Approach:**
 
 - **Sorting**: The rectangles are first sorted in decreasing order of height. This ensures that taller rectangles are placed first, which helps in optimizing space usage vertically.
 - **Packing Strategy**: The algorithm iterates over the sorted list of rectangles, placing each rectangle into the first bin (row) that has enough remaining width to accommodate it. If no such bin exists, a new bin is created.
 - **Advantages**: This method is straightforward and efficient for minimizing the height of the packing by ensuring that the tallest rectangles are placed first, reducing the chance of creating excessively high bins later on.
 
-##### 2. **Next Fit Decreasing Height (NFDH)**
-**Solution Approach:**
-- **Sorting**: Similar to FFDH, the rectangles are sorted in decreasing order of height.
-- **Packing Strategy**: The algorithm places each rectangle into the current bin (row) if it fits. If the rectangle does not fit in the current bin, a new bin is created, and the rectangle is placed in this new bin.
-- **Advantages**: This approach reduces the complexity of checking multiple bins for space, as it only considers the current bin, making it faster but potentially less space-efficient than FFDH.
+##### 3. **Sleator**
 
-##### 3. Size Alternating Stack (SAS)
 **Solution Approach:**
+
+- **Partitioning**: Rectangles are divided into two groups based on their width relative to the given strip width: Group A (width > half of the strip width) and Group B (width <= half of the strip width).
+- **Packing Strategy**: 
+  - **Group A**: Rectangles are placed vertically along the left side of the strip, one above the other.
+  - **Group B**: Rectangles are placed horizontally at the bottom or top of the strip, balancing the height on both ends.
+- **Advantages**: This method effectively utilizes the width of the strip and balances the height by strategically placing rectangles based on their widths.
+
+##### 4. **Split Packing (SP)**
+
+**Solution Approach:**
+
+- **Sorting**: Rectangles are sorted by width and height to prioritize placing larger rectangles first.
+- **Packing Strategy**: The algorithm creates strips to accommodate rectangles, cutting strips into sub-strips as needed to fit the rectangles. This method allows for efficient use of space by creating flexible packing regions within the large bin.
+- **Advantages**: Split Packing can handle a diverse set of rectangle sizes and efficiently use the available space by dynamically adjusting strip sizes.
+
+##### 5. Size Alternating Stack (SAS)
+**Solution Approach:**
+
 - **Partitioning**: Rectangles are divided into two categories: narrow (width < height) and wide (width >= height).
 - **Sorting**: Narrow rectangles are sorted by height, and wide rectangles are sorted by width. This prioritization helps in organizing the packing more efficiently.
 - **Packing Strategy**: The packing process alternates between placing narrow and wide rectangles, starting with the taller rectangles first. This alternation helps in balancing the use of space and minimizing the height incrementally.
 - **Advantages**: By categorizing and sorting rectangles, SAS efficiently uses space and reduces the overall height required for packing, which performs well when the maximum width of the rectangles is close to the width of the container.
 
-##### 4. **Advanced Size Alternating Stack (ad_SAS)**
+##### 6. **Advanced Size Alternating Stack (ad_SAS)**
 
 ​	However, when the container width is much larger than the width of the rectangles, SAS algorithm performs poorly. Therefore, we optimized this algorithm and designed ad_SAS algorithm.
 
@@ -70,20 +90,6 @@ body, pre {
 - **Sorting**: Narrow rectangles are sorted by height, and wide rectangles are sorted by width.
 - **Packing Strategy**: When there is surplus space in the horizontal direction, this algorithm continues to pack wide until the horizontal space is maximally utilized.
 - **Advantages**: This algorithm effectively addresses the issue of SA's inefficient utilization in the horizontal direction.
-
-##### 5. **Sleator**
-**Solution Approach:**
-- **Partitioning**: Rectangles are divided into two groups based on their width relative to the given strip width: Group A (width > half of the strip width) and Group B (width <= half of the strip width).
-- **Packing Strategy**: 
-  - **Group A**: Rectangles are placed vertically along the left side of the strip, one above the other.
-  - **Group B**: Rectangles are placed horizontally at the bottom or top of the strip, balancing the height on both ends.
-- **Advantages**: This method effectively utilizes the width of the strip and balances the height by strategically placing rectangles based on their widths.
-
-##### 6. **Split Packing (SP)**
-**Solution Approach:**
-- **Sorting**: Rectangles are sorted by width and height to prioritize placing larger rectangles first.
-- **Packing Strategy**: The algorithm creates strips to accommodate rectangles, cutting strips into sub-strips as needed to fit the rectangles. This method allows for efficient use of space by creating flexible packing regions within the large bin.
-- **Advantages**: Split Packing can handle a diverse set of rectangle sizes and efficiently use the available space by dynamically adjusting strip sizes.
 
 #### Expected Outcomes
 
@@ -218,7 +224,7 @@ Here is the detailed analysis of the time and space complexity for each of the i
   - **Current Widths**: $O(n)$ for the array tracking the current width of each bin.
   - **Overall**: $O(n)$.
 
-#### 3. **Simple Approximation Scheme (SAS)**
+#### 3. **Size Alternating Stack (SAS)**
 - **Time Complexity**:
   - **Partitioning**: Dividing rectangles into narrow and wide categories takes $O(n)$.
   - **Sorting**: Sorting narrow and wide rectangles takes $O(n \log n)$ each, totaling $O(n \log n)$.
@@ -229,15 +235,15 @@ Here is the detailed analysis of the time and space complexity for each of the i
   - **Narrow and Wide Lists**: $O(n)$ each, totaling $O(n)$.
   - **Overall**: $O(n)$.
 
-#### 4. **Adaptive Simple Approximation Scheme (ad_SAS)**
+#### 4. **Advanced Size Alternating Stack (ad_SAS)**
 - **Time Complexity**:
   - **Partitioning**: Dividing rectangles into narrow and wide categories takes $O(n)$.
   - **Sorting**: Sorting narrow and wide rectangles takes $O(n \log n)$ each, totaling $O(n \log n)$.
-  - **Packing**: The adaptive packing process involves multiple passes and adjustments, potentially leading to $O(n^2)$ in the worst case.
-  - **Overall**: $O(n \log n) + O(n^2) = O(n^2)$.
+  - **Packing**: The packing process involves linear traversal of both narrow and wide rectangles, taking $O(n)$.
+  - **Overall**: $O(n \log n) + O(n) + O(n) = O(n \log n)$.
 - **Space Complexity**:
   - **Storage for Rectangles**: $O(n)$.
-  - **Narrow and Wide Lists**: $O(n)$ each, totaling$ (O(n))$.
+  - **Narrow and Wide Lists**: $O(n)$ each, totaling $O(n)$.
   - **Overall**: $O(n)$.
 
 #### 5. **Sleator Algorithm**
