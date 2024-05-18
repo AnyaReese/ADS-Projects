@@ -37,6 +37,9 @@ double NFDH(vector<Rectangle>& recs);
 double SAS(vector<Rectangle>& recs);
 void PackNarrow(vector<Rectangle>& narrow, vector<Rectangle>& wide, double x1, double y1, double x_limit, double y_limit);
 void PackWide(vector<Rectangle>& narrow, vector<Rectangle>& wide, double x1, double y1, double x_limit, double y_limit);
+double ad_SAS(vector<Rectangle>& recs);
+void ad_PackNarrow(vector<Rectangle>& narrow, vector<Rectangle>& wide, double x1, double y1, double x_limit, double y_limit);
+void ad_PackWide(vector<Rectangle>& narrow, vector<Rectangle>& wide, double x1, double y1, double x_limit, double y_limit);
 void testTime(vector<Rectangle>& recs);
 
 bool cmpBins(const Rectangle& a, const Rectangle& b) {
@@ -64,23 +67,33 @@ int main() {
 
 void testTime(vector<Rectangle>& rects) {
     // calculate time
-    clock_t start_SAS, end_SAS, start_FFDH, end_FFDH, start_NFDH, end_NFDH, start_Sleator, end_Sleator, start_SP, end_SP;
+    clock_t start_ad_SAS,end_ad_SAS,start_SAS, end_SAS, start_FFDH, end_FFDH, start_NFDH, end_NFDH, start_Sleator, end_Sleator, start_SP, end_SP;
+    
     start_SAS = clock();
     double height_SAS = SAS(rects);
     end_SAS = clock();
+
+    start_ad_SAS = clock();
+    double height_ad_SAS = ad_SAS(rects);
+    end_ad_SAS = clock();
+
     start_FFDH = clock();
     double height_FFDH = FFDH(rects);
     end_FFDH = clock();
+
     start_NFDH = clock();
     double height_NFDH = NFDH(rects);
     end_NFDH = clock();
+
     start_Sleator = clock();
     double height_Sleator = Sleator(rects);
     end_Sleator = clock();
+
     start_SP = clock();
     double heigh_SP = SP(rects);
     end_SP = clock();
 
+    cout << "Height of the packing obtained in the strip using improved SAS: " << height_ad_SAS << ", takes " << (double)(end_ad_SAS - start_ad_SAS) / CLOCKS_PER_SEC << " seconds" << endl;
     cout << "Height of the packing obtained in the strip using SAS: " << height_SAS << ", takes " << (double)(end_SAS - start_SAS) / CLOCKS_PER_SEC << " seconds" << endl;
     cout << "Height of the packing obtained in the strip using FFDH: " << height_FFDH << ", takes " << (double)(end_FFDH - start_FFDH) / CLOCKS_PER_SEC << " seconds" << endl;
     cout << "Height of the packing obtained in the strip using NFDH: " << height_NFDH << ", takes " << (double)(end_NFDH - start_NFDH) / CLOCKS_PER_SEC << " seconds" << endl;
@@ -210,6 +223,183 @@ double NFDH(vector<Rectangle>& rects) {
 
     return height;
 }
+/**
+ * Input: The number of rectangles to be packed n, the dimensions of the rectangles ⟨w(Li ), h(Li )⟩
+ * and the strip width W .
+ * Output: The height H of the packing obtained in the strip.
+ * @author AnyaReese
+ * @param recs a vector of rectangles
+ * @return height
+ */
+double ad_SAS(vector<Rectangle>& recs) {
+    vector<Rectangle> narrow;
+    vector<Rectangle> wide;
+
+    if (enableLog) {
+        cout << "\e[33m[Info]: Using SAS\e[0m" << endl;
+    }
+
+    // Partition rectangles into narrow and wide
+    for (const auto& rec : recs) {
+        if (rec.width < rec.height) {
+            narrow.push_back(rec);
+        } else {
+            wide.push_back(rec);
+        }
+    }
+
+    // Sort by height to prioritize taller rectangles first
+    auto cmpHeight = [](const Rectangle& a, const Rectangle& b) { return a.height > b.height; };
+    auto cmpWide = [](const Rectangle& a, const Rectangle& b) { return a.width > b.width; };
+    sort(narrow.begin(), narrow.end(), cmpHeight);
+    sort(wide.begin(), wide.end(), cmpWide);
+
+    double current_x = 0, current_y = 0;
+
+    bool init_with_wide = 0;
+    double height_limit = 0;
+    int count = 0;
+    // Packing process
+    while (!narrow.empty() || !wide.empty()) {
+        count++;
+        if (!narrow.empty() && !wide.empty()) {
+            if (narrow[0].height > wide[0].height) {
+                init_with_wide = false;
+                current_x = narrow[0].width;
+                current_y = height_limit;
+                height_limit += narrow[0].height;
+                if (enableLog) {
+                    cout << "\e[32mHeight Changed By Narrow Rectangle whose height is: " << narrow[0].height << "\e[0m" << endl;
+                }
+                narrow.erase(narrow.begin());
+            } else { // wide[0].height >= narrow[0].height
+                init_with_wide = true;
+                current_x = wide[0].width;
+                current_y = height_limit;
+                height_limit += wide[0].height;
+                if (enableLog) {
+                    cout << "\e[32mHeight Changed By Wide Rectangle whose height is: " << wide[0].height << "\e[0m" << endl;
+                }
+                wide.erase(wide.begin());
+            }
+        } else if (!narrow.empty()) {
+            init_with_wide = false;
+            current_x = narrow[0].width;
+            current_y = height_limit;
+            height_limit += narrow[0].height;
+            if (enableLog) {
+                cout << "\e[32mHeight Changed By Narrow Rectangle whose height is: " << narrow[0].height << "\e[0m" << endl;
+            }
+            narrow.erase(narrow.begin());
+        } else { // wide.size()
+            init_with_wide = true;
+            current_x = wide[0].width;
+            current_y = height_limit;
+            height_limit += wide[0].height;
+            if (enableLog) {
+                cout << "\e[32mHeight Changed By Wide Rectangle whose height is: " << wide[0].height << "\e[0m" << endl;
+            }
+            wide.erase(wide.begin());
+        } /* end of Initialization Narrow or Wide */
+        if (init_with_wide) { // Pack Narrow
+            cout<<count<<" : ad_PackNarrow"<<endl;
+            ad_PackNarrow(narrow, wide, current_x, current_y, given_width, height_limit);
+        } else { // Pack Wide
+            cout<<count<<" : ad_PackWide"<<endl;
+            ad_PackWide(narrow, wide, current_x, current_y, given_width, height_limit);
+        }
+    }
+    return height_limit;
+}
+
+/**
+ * Improved Pack Narrow
+ * Traverse each narrow, if it fits narrow-wise and height-wise, pack it.
+ * @return
+ */
+
+void ad_PackNarrow(vector<Rectangle>& narrow, vector<Rectangle>& wide, double x1, double y1, double x_limit, double y_limit) {
+    double baseWidth;
+    double curr_X1 = x1;
+    double curr_Y1 = y1;
+    if (!narrow.empty()) {
+        while (!narrow.empty() && (curr_X1 + narrow[0].width <= x_limit)) {
+            baseWidth = narrow[0].width;
+            while (!narrow.empty() && (curr_Y1 + narrow[0].height <= y_limit) && (narrow[0].width <= baseWidth)) {
+                curr_Y1 += narrow[0].height;
+                narrow.erase(narrow.begin());
+            }
+            
+            cout << "Packing narrow at (" << curr_X1 << ", " << curr_Y1 << ")" << endl;
+            
+            curr_X1 += baseWidth;
+            curr_Y1 = y1;
+        }
+
+        double min_height = narrow.back().height;
+        double min_width = wide.back().width;
+
+    }
+}
+
+/**
+ * Pack Wide
+ * Traverse each wide, if it fits wide-wise and height-wise, pack it.
+ * If no wide fits but narrows spare, pack narrow.
+ * @return
+ */
+
+void ad_PackWide(vector<Rectangle>& narrow, vector<Rectangle>& wide, double x1, double y1, double x_limit, double y_limit) {
+    double current_X1 = x1;
+    double pre_Y1 = y1;
+    double pre_x_limit = x_limit; // 保存刚开始 PackWide 的 y1
+    int flag = 1;
+    if (!wide.empty() && (x1 + wide[0].width <= x_limit)) {
+        for (int i = 0; i < wide.size(); i++) { // traverse each wide
+        
+            cout<<"i  "<<i<<endl;
+            // 放置宽矩形
+            if (y1 + wide[i].height <= y_limit) {
+
+                if(flag){
+                    current_X1 += wide[i].width;
+                    flag = 0;
+                }
+                // 在形成的间隙中放入窄矩形
+                if ((x1 + wide[i].width <= x_limit) && (x_limit != given_width)) {
+                    ad_PackNarrow(narrow, wide, x1 + wide[i].width, y1, x_limit, y_limit);
+                }
+                cout << "Packing wide at (" << x1 << ", " << y1 << ")" << endl;
+                x_limit = x1 + wide[i].width;
+                y1 += wide[i].height;
+                wide.erase(wide.begin() + i);
+                i--;
+            }
+        }
+    }
+
+    if (wide.empty() && !narrow.empty()) { // 如果宽矩形放完了，就直接放窄矩形
+        ad_PackNarrow(narrow, wide, x1, y1, x_limit, y_limit);
+    }
+
+    // 如果在右边的间隙中还能放得下宽矩形，就继续放宽矩形
+    if((!wide.empty() && current_X1 + wide[0].width <= pre_x_limit )) {
+        double baseWidth = wide[0].width;
+        wide.erase(wide.begin());
+        cout << "ad_PackWide at " << current_X1 <<"  "<< pre_Y1<<"  "<< pre_x_limit <<"  "<<y_limit<< endl;
+        
+        ad_PackWide(narrow, wide, current_X1, pre_Y1, pre_x_limit , y_limit);
+    }
+
+    // 如果宽矩形没了但是右边还能放窄矩形，就继续放窄矩形
+    if (!narrow.empty() && current_X1 + narrow[0].width < pre_x_limit) {
+        cout << "ad_PackNarrow at " << current_X1 <<"  "<< pre_Y1<<"  "<< pre_x_limit <<"  "<<y_limit<< endl;
+        ad_PackNarrow(narrow, wide, current_X1, pre_Y1, pre_x_limit, y_limit );
+    }
+     
+
+}
+
 
 /**
  * Input: The number of rectangles to be packed n, the dimensions of the rectangles ⟨w(Li ), h(Li )⟩
@@ -302,6 +492,7 @@ double SAS(vector<Rectangle>& recs) {
  * Traverse each narrow, if it fits narrow-wise and height-wise, pack it.
  * @return
  */
+
 void PackNarrow(vector<Rectangle>& narrow, vector<Rectangle>& wide, double x1, double y1, double x_limit, double y_limit) {
     if (!narrow.empty()) {
         double baseWidth;
