@@ -18,7 +18,7 @@ body, pre {
 
 ### 1.1 Background
 
-​	Texture packing is a critical problem in the field of computer graphics, where the goal is to efficiently pack multiple rectangle-shaped textures into a single large texture. This process is essential in various applications, including video game development, 3D rendering, and image processing, where minimizing the texture memory usage and optimizing rendering performance are crucial.
+​	Texture packing is a critical problem in the field of computer graphics, where the goal is to efficiently pack multiple rectangle-shaped textures into a single large texture. 
 
 ​	The primary objective of texture packing is to arrange the given textures within a large texture of specified width while minimizing the height required. This is akin to a two-dimensional bin packing problem, which is known to be NP-hard. Hence, exact solutions are computationally infeasible for large instances, making approximation algorithms a practical choice.
 
@@ -53,21 +53,25 @@ body, pre {
 - **Packing Strategy**: The algorithm places each rectangle into the current bin (row) if it fits. If the rectangle does not fit in the current bin, a new bin is created, and the rectangle is placed in this new bin.
 - **Advantages**: This approach reduces the complexity of checking multiple bins for space, as it only considers the current bin, making it faster but potentially less space-efficient than FFDH.
 
-##### 3. **Simple Approximation Scheme (SAS)**
+##### 3. Size Alternating Stack (SAS)
 **Solution Approach:**
 - **Partitioning**: Rectangles are divided into two categories: narrow (width < height) and wide (width >= height).
 - **Sorting**: Narrow rectangles are sorted by height, and wide rectangles are sorted by width. This prioritization helps in organizing the packing more efficiently.
 - **Packing Strategy**: The packing process alternates between placing narrow and wide rectangles, starting with the taller rectangles first. This alternation helps in balancing the use of space and minimizing the height incrementally.
-- **Advantages**: By categorizing and sorting rectangles, SAS efficiently uses space and reduces the overall height required for packing.
+- **Advantages**: By categorizing and sorting rectangles, SAS efficiently uses space and reduces the overall height required for packing, which performs well when the maximum width of the rectangles is close to the width of the container.
 
-##### 4. **Adaptive Simple Approximation Scheme (ad_SAS)**
+##### 4. **Advanced Size Alternating Stack (ad_SAS)**
+
+​	However, when the container width is much larger than the width of the rectangles, SAS algorithm performs poorly. Therefore, we optimized this algorithm and designed ad_SAS algorithm.
+
 **Solution Approach:**
-- **Adaptive Partitioning**: Similar to SAS, rectangles are divided into narrow and wide categories, but with a more flexible approach to accommodate dynamic changes during the packing process.
-- **Sorting**: Narrow rectangles are sorted by height, and wide rectangles are sorted by width.
-- **Packing Strategy**: The adaptive version adjusts the packing strategy based on the current state, dynamically switching between packing narrow and wide rectangles to optimize space usage.
-- **Advantages**: This adaptive approach provides more flexibility and can potentially achieve better packing efficiency by responding to the current configuration of packed rectangles.
 
-##### 5. **Sleator Algorithm**
+- **Adaptive Partitioning**: Similar to SAS, rectangles are divided into two categories: narrow (width < height) and wide (width >= height).
+- **Sorting**: Narrow rectangles are sorted by height, and wide rectangles are sorted by width.
+- **Packing Strategy**: When there is surplus space in the horizontal direction, this algorithm continues to pack wide until the horizontal space is maximally utilized.
+- **Advantages**: This algorithm effectively addresses the issue of SA's inefficient utilization in the horizontal direction.
+
+##### 5. **Sleator**
 **Solution Approach:**
 - **Partitioning**: Rectangles are divided into two groups based on their width relative to the given strip width: Group A (width > half of the strip width) and Group B (width <= half of the strip width).
 - **Packing Strategy**: 
@@ -117,7 +121,7 @@ By the end of this project, the developed algorithm and the accompanying analysi
   - `bool cmpBins(const Rectangle& a, const Rectangle& b)`: Comparator function to sort rectangles by height.
   - `double NFDH(vector<Rectangle>& rects)`: Function to implement the NFDH algorithm.
 
-#### 3. **Simple Approximation Scheme (SAS)**
+#### 3. **Size Alternating Stack(SAS)**
 - **Data Structures**:
   - `vector<Rectangle> narrow`: List of narrow rectangles (width < height).
   - `vector<Rectangle> wide`: List of wide rectangles (width >= height).
@@ -131,7 +135,7 @@ By the end of this project, the developed algorithm and the accompanying analysi
   - `void PackNarrow(vector<Rectangle>& narrow, vector<Rectangle>& wide, double x1, double y1, double x_limit, double y_limit)`: Helper function to pack narrow rectangles.
   - `void PackWide(vector<Rectangle>& narrow, vector<Rectangle>& wide, double x1, double y1, double x_limit, double y_limit)`: Helper function to pack wide rectangles.
 
-#### 4. **Adaptive Simple Approximation Scheme (ad_SAS)**
+#### 4. **Advanced Size Alternating Stack (ad_SAS)**
 - **Data Structures**:
   - `vector<Rectangle> narrow`: List of narrow rectangles (width < height).
   - `vector<Rectangle> wide`: List of wide rectangles (width >= height).
@@ -145,7 +149,7 @@ By the end of this project, the developed algorithm and the accompanying analysi
   - `void ad_PackNarrow(vector<Rectangle>& narrow, vector<Rectangle>& wide, double x1, double y1, double x_limit, double y_limit)`: Adaptive helper function to pack narrow rectangles.
   - `void ad_PackWide(vector<Rectangle>& narrow, vector<Rectangle>& wide, double x1, double y1, double x_limit, double y_limit)`: Adaptive helper function to pack wide rectangles.
 
-#### 5. **Sleator Algorithm**
+#### 5. **Sleator**
 - **Data Structures**:
   - `vector<Rectangle> groupA`: List of rectangles with width greater than half of the strip width.
   - `vector<Rectangle> groupB`: List of rectangles with width less than or equal to half of the strip width.
