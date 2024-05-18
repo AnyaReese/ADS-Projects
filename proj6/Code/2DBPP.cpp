@@ -2,8 +2,7 @@
 #include <random>
 #include <vector>
 #include <algorithm>
-// #include <time.h>
-
+#include <iomanip>
 #define enableLog 0 // Enable log
 
 /**
@@ -93,13 +92,29 @@ void testTime(vector<Rectangle>& rects) {
     start_SP = clock();
     double heigh_SP = SP(rects);
     end_SP = clock();
-
-    cout << "Height of the packing obtained in the strip using improved SAS: " << height_ad_SAS << ", takes " << (double)(end_ad_SAS - start_ad_SAS) / CLOCKS_PER_SEC << " seconds" << endl;
-    cout << "Height of the packing obtained in the strip using SAS: " << height_SAS << ", takes " << (double)(end_SAS - start_SAS) / CLOCKS_PER_SEC << " seconds" << endl;
-    cout << "Height of the packing obtained in the strip using FFDH: " << height_FFDH << ", takes " << (double)(end_FFDH - start_FFDH) / CLOCKS_PER_SEC << " seconds" << endl;
-    cout << "Height of the packing obtained in the strip using NFDH: " << height_NFDH << ", takes " << (double)(end_NFDH - start_NFDH) / CLOCKS_PER_SEC << " seconds" << endl;
-    cout << "Height of the packing obtained in the strip using Sleator: " << height_Sleator << ", takes " << (double)(end_Sleator - start_Sleator) / CLOCKS_PER_SEC << " seconds" << endl;
-    cout << "Height of the packing obtained in the strip using SP: " << heigh_SP << ", takes " << (double)(end_SP - start_SP) / CLOCKS_PER_SEC << " seconds" << endl;
+    cout << "Height of the packing obtained in the strip using improved SAS: " << height_ad_SAS ;
+    cout << fixed << setprecision(6);
+    cout << ", takes " << (double)(end_ad_SAS - start_ad_SAS) / CLOCKS_PER_SEC << " seconds" << endl;
+    cout << fixed << setprecision(0);
+    cout << "Height of the packing obtained in the strip using SAS: " << height_SAS ;
+    cout << fixed << setprecision(6);
+    cout << ", takes " << (double)(end_SAS - start_SAS) / CLOCKS_PER_SEC << " seconds" << endl;
+    cout << fixed << setprecision(0);
+    cout << "Height of the packing obtained in the strip using FFDH: " << height_FFDH ;
+    cout << fixed << setprecision(6);
+    cout << ", takes " << (double)(end_FFDH - start_FFDH) / CLOCKS_PER_SEC << " seconds" << endl;
+    cout << fixed << setprecision(0);
+    cout << "Height of the packing obtained in the strip using NFDH: " << height_NFDH ;
+    cout << fixed << setprecision(6);
+    cout << ", takes " << (double)(end_NFDH - start_NFDH) / CLOCKS_PER_SEC << " seconds" << endl;
+    cout << fixed << setprecision(0);
+    cout << "Height of the packing obtained in the strip using Sleator: " << height_Sleator;
+    cout << fixed << setprecision(6);
+    cout << ", takes " << (double)(end_Sleator - start_Sleator) / CLOCKS_PER_SEC << " seconds" << endl;
+    cout << fixed << setprecision(0);
+    cout << "Height of the packing obtained in the strip using SP: " << heigh_SP ;
+    cout << fixed << setprecision(6);
+    cout << ", takes " << (double)(end_SP - start_SP) / CLOCKS_PER_SEC << " seconds" << endl;
 }
 
 /**
@@ -303,10 +318,8 @@ double ad_SAS(vector<Rectangle>& recs) {
             wide.erase(wide.begin());
         } /* end of Initialization Narrow or Wide */
         if (init_with_wide) { // Pack Narrow
-            cout<<count<<" : ad_PackNarrow"<<endl;
             ad_PackNarrow(narrow, wide, current_x, current_y, given_width, height_limit);
         } else { // Pack Wide
-            cout<<count<<" : ad_PackWide"<<endl;
             ad_PackWide(narrow, wide, current_x, current_y, given_width, height_limit);
         }
     }
@@ -330,8 +343,9 @@ void ad_PackNarrow(vector<Rectangle>& narrow, vector<Rectangle>& wide, double x1
                 curr_Y1 += narrow[0].height;
                 narrow.erase(narrow.begin());
             }
-            
-            cout << "Packing narrow at (" << curr_X1 << ", " << curr_Y1 << ")" << endl;
+            if (enableLog) {
+                cout << "Packing narrow at (" << curr_X1 << ", " << curr_Y1 << ")" << endl;
+            }
             
             curr_X1 += baseWidth;
             curr_Y1 = y1;
@@ -358,7 +372,6 @@ void ad_PackWide(vector<Rectangle>& narrow, vector<Rectangle>& wide, double x1, 
     if (!wide.empty() && (x1 + wide[0].width <= x_limit)) {
         for (int i = 0; i < wide.size(); i++) { // traverse each wide
         
-            cout<<"i  "<<i<<endl;
             // 放置宽矩形
             if (y1 + wide[i].height <= y_limit) {
 
@@ -370,7 +383,9 @@ void ad_PackWide(vector<Rectangle>& narrow, vector<Rectangle>& wide, double x1, 
                 if ((x1 + wide[i].width <= x_limit) && (x_limit != given_width)) {
                     ad_PackNarrow(narrow, wide, x1 + wide[i].width, y1, x_limit, y_limit);
                 }
-                cout << "Packing wide at (" << x1 << ", " << y1 << ")" << endl;
+                if (enableLog) {
+                    cout << "Packing wide at (" << x1 << ", " << y1 << ")" << endl;
+                }
                 x_limit = x1 + wide[i].width;
                 y1 += wide[i].height;
                 wide.erase(wide.begin() + i);
