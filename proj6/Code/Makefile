@@ -1,40 +1,44 @@
-# Compiler settings - Can change to clang++ if required
-CXX = g++
-CXXFLAGS = -std=c++11 -Wall -O2
+# Compiler
+CC = g++
 
-# Project file structure
-SRCDIR = .
-BUILDDIR = ./build
-TARGET = $(BUILDDIR)/2DBPP.out
+# Compiler flags
+CFLAGS = -Wall -g -Iincludes -std=c++11 -O2
 
-# Source and object files
-SOURCES = $(SRCDIR)/2DBPP.cpp
-OBJECTS = $(patsubst $(SRCDIR)/%.cpp,$(BUILDDIR)/%.o,$(SOURCES))
+# Directories
+INCDIR = includes
+SRCDIR = src
+OBJDIR = build
 
-# Default make
+# Target executable
+TARGET = build/program
+
+# Source files
+SRCS = $(SRCDIR)/main.cpp $(SRCDIR)/algorithms.cpp $(SRCDIR)/utils.cpp
+
+# Object files
+OBJS = $(OBJDIR)/main.o $(OBJDIR)/algorithms.o $(OBJDIR)/utils.o
+
+# Default rule
 all: $(TARGET)
 
-# Link the target binary
-$(TARGET): $(OBJECTS)
-	@mkdir -p $(BUILDDIR)
-	$(CXX) $(CXXFLAGS) $^ -o $@
+# Linking
+$(TARGET): $(OBJS)
+	$(CC) $(CFLAGS) -o $(TARGET) $(OBJS)
 
-# Compile the source files into object files
-$(BUILDDIR)/%.o: $(SRCDIR)/%.cpp
-	@mkdir -p $(BUILDDIR)
-	$(CXX) $(CXXFLAGS) -c $< -o $@
-
-# Clean up
-clean:
-	rm -f $(BUILDDIR)/*.o $(TARGET)
-	@echo "clean finished!"
-
-test:
-	@echo "Generating test cases..."
-	cd ../Test && python3 gen_cases.py && cd ../Code
+# Compilation
+$(OBJDIR)/%.o: $(SRCDIR)/%.cpp
+	mkdir -p $(OBJDIR)
+	$(CC) $(CFLAGS) -c $< -o $@
 
 # Run the program
 run: $(TARGET)
 	./$(TARGET)
 
-.PHONY: all clean run
+# Clean up
+clean:
+	rm -rf $(OBJDIR) $(TARGET)
+
+# Dependencies
+$(OBJDIR)/main.o: $(SRCDIR)/main.cpp $(INCDIR)/algorithms.h $(INCDIR)/utils.h
+$(OBJDIR)/algorithms.o: $(SRCDIR)/algorithms.cpp $(INCDIR)/algorithms.h $(INCDIR)/utils.h
+$(OBJDIR)/utils.o: $(SRCDIR)/utils.cpp $(INCDIR)/utils.h

@@ -120,10 +120,6 @@ By the end of this project, the developed algorithm and the accompanying analysi
 #### 1. **First Fit Decreasing Height (FFDH)**
 - **Data Structures**:
   - `vector<Rectangle> rects`: List of rectangles to be packed.
-- **Global Variables**:
-  - `double current_width[n]`: Array to keep track of the current width used in each bin.
-  - `int n`: Total number of rectangles.
-  - `double given_width`: The width of the large bin.
 - **Functions**:
   - `bool cmpBins(const Rectangle& a, const Rectangle& b)`: Comparator function to sort rectangles by height.
   - `double FFDH(vector<Rectangle>& rects)`: Function to implement the FFDH algorithm.
@@ -131,10 +127,6 @@ By the end of this project, the developed algorithm and the accompanying analysi
 #### 2. **Next Fit Decreasing Height (NFDH)**
 - **Data Structures**:
   - `vector<Rectangle> rects`: List of rectangles to be packed.
-- **Global Variables**:
-  - `double current_width[n]`: Array to keep track of the current width used in each bin.
-  - `int n`: Total number of rectangles.
-  - `double given_width`: The width of the large bin.
 - **Functions**:
   - `bool cmpBins(const Rectangle& a, const Rectangle& b)`: Comparator function to sort rectangles by height.
   - `double NFDH(vector<Rectangle>& rects)`: Function to implement the NFDH algorithm.
@@ -143,58 +135,141 @@ By the end of this project, the developed algorithm and the accompanying analysi
 - **Data Structures**:
   - `vector<Rectangle> narrow`: List of narrow rectangles (width < height).
   - `vector<Rectangle> wide`: List of wide rectangles (width >= height).
-- **Global Variables**:
-  - `int n`: Total number of rectangles.
-  - `double given_width`: The width of the large bin.
 - **Functions**:
   - `bool cmpHeight(const Rectangle& a, const Rectangle& b)`: Comparator function to sort rectangles by height.
   - `bool cmpWide(const Rectangle& a, const Rectangle& b)`: Comparator function to sort rectangles by width.
   - `double SAS(vector<Rectangle>& rects)`: Function to implement the SAS algorithm.
   - `void PackNarrow(vector<Rectangle>& narrow, vector<Rectangle>& wide, double x1, double y1, double x_limit, double y_limit)`: Helper function to pack narrow rectangles.
   - `void PackWide(vector<Rectangle>& narrow, vector<Rectangle>& wide, double x1, double y1, double x_limit, double y_limit)`: Helper function to pack wide rectangles.
+- **Pseudocode**:
+
+```pseudocode
+Define PackNarrow(narrow, wide, x1, y1, x_limit, y_limit):
+    While narrow is not empty and fits within x_limit:
+        Set baseWidth to current narrow width
+        While narrow fits within y_limit and baseWidth:
+            Pack narrow rectangle at current coordinates
+            Remove narrow rectangle
+        Update current_x and current_y
+Define PackWide(narrow, wide, x1, y1, x_limit, y_limit):
+    While wide is not empty and fits within x_limit:
+        For each wide rectangle:
+            If it fits within y_limit:
+                If remaining width can fit narrow, pack narrow
+                Pack wide rectangle at current coordinates
+                Remove wide rectangle
+        If no more wide rectangles but narrow rectangles remain, pack narrow
+```
+
+
 
 #### 4. **Advanced Size Alternating Stack (ad_SAS)**
 - **Data Structures**:
   - `vector<Rectangle> narrow`: List of narrow rectangles (width < height).
   - `vector<Rectangle> wide`: List of wide rectangles (width >= height).
-- **Global Variables**:
-  - `int n`: Total number of rectangles.
-  - `double given_width`: The width of the large bin.
 - **Functions**:
   - `bool cmpHeight(const Rectangle& a, const Rectangle& b)`: Comparator function to sort rectangles by height.
   - `bool cmpWide(const Rectangle& a, const Rectangle& b)`: Comparator function to sort rectangles by width.
   - `double ad_SAS(vector<Rectangle>& rects)`: Function to implement the adaptive SAS algorithm.
   - `void ad_PackNarrow(vector<Rectangle>& narrow, vector<Rectangle>& wide, double x1, double y1, double x_limit, double y_limit)`: Advanced helper function to pack narrow rectangles.
   - `void ad_PackWide(vector<Rectangle>& narrow, vector<Rectangle>& wide, double x1, double y1, double x_limit, double y_limit)`: Advanced helper function to pack wide rectangles.
+- **Pseudocode**:
+
+```pseudocode
+Function ad_PackNarrow(narrow, wide, x1, y1, x_limit, y_limit):
+    While narrow is not empty and fits within x_limit:
+        Set baseWidth to current narrow width
+        While narrow fits within y_limit and baseWidth:
+            Pack narrow rectangle at (curr_X1, curr_Y1)
+            Update curr_Y1
+            Remove packed narrow rectangle
+        Update curr_X1
+        Reset curr_Y1 to y1
+    If narrow is empty and wide can fit:
+        Call ad_PackWide with updated parameters
+        
+Function ad_PackWide(narrow, wide, x1, y1, x_limit, y_limit):
+    While wide is not empty and fits within x_limit:
+        For each wide rectangle:
+            If wide fits within y_limit:
+                If first wide rectangle:
+                    Update first_width
+                If remaining width can fit narrow:
+                    Call ad_PackNarrow with updated parameters
+                Pack wide rectangle at (x1, y1)
+                Update x_limit and y1
+                Remove packed wide rectangle
+    If right space can fit wide:
+        Call ad_PackWide with updated parameters
+        Return
+    If wide is empty but narrow can fit:
+        Call ad_PackNarrow with updated parameters
+```
 
 #### 5. **Sleator**
 - **Data Structures**:
   - `vector<Rectangle> groupA`: List of rectangles with width greater than half of the strip width.
   - `vector<Rectangle> groupB`: List of rectangles with width less than or equal to half of the strip width.
-- **Global Variables**:
-  - `int n`: Total number of rectangles.
-  - `double given_width`: The width of the large bin.
+  
 - **Functions**:
   - `double Sleator(vector<Rectangle>& rects)`: Function to implement the Sleator algorithm.
+  
+- **Pseudocode**:
+
+  ```pseudocode
+  Divide rectangles into Group A (width > half strip width) and Group B (width <= half strip width)
+  Initialize currentHeight to 0
+  Place items from Group A vertically, updating currentHeight
+  Sort Group B by height in descending order
+  Initialize lowerHeight and upperHeight to currentHeight
+  Place items from Group B horizontally, balancing between lowerHeight and upperHeight:
+      For each item in Group B:
+          Determine maximum height that can be achieved by placing items horizontally
+          Update either lowerHeight or upperHeight
+  Return the maximum of lowerHeight and upperHeight
+  ```
+
+  
 
 #### 6. **Split Packing (SP)**
 - **Data Structures**:
   - `vector<Rectangle> rects`: List of rectangles to be packed.
   - `vector<Strip> strips`: List of strips used for packing.
-- **Global Variables**:
-  - `int n`: Total number of rectangles.
-  - `double given_width`: The width of the large bin.
 - **Functions**:
   - `bool cmp(const Rectangle& a, const Rectangle& b)`: Comparator function to sort rectangles by width and height.
   - `double SP(vector<Rectangle>& rects)`: Function to implement the Split Packing algorithm.
+- **Pseudocode**:
+
+```pseudocode
+for each rectangle i in recs:
+    s_index = 0  // Initialize strip index to 0
+    // Find the first strip that can accommodate the rectangle
+    for each strip j from 1 to strip_num:
+        if strip j can fit rectangle i:
+            if no strip selected yet:
+                select strip j
+            else if strip j is narrower than currently selected strip:
+                select strip j
+    if no suitable strip found:
+        // Find the strip with the lowest upper bound
+        for each strip j from 1 to strip_num:
+            if no strip selected yet or strip j has a lower upper bound:
+                select strip j
+        update selected strip's lower and upper bounds
+        set strip's item width to rectangle's width
+    else:
+        // Suitable strip found, place the item and create two substrips
+        create s1 using selected strip's item width and upper bound
+        create s2 using rectangle's width and selected strip's lower bound
+        
+        remove selected strip from list
+        insert s1 and s2 into the list
+        increment strip_num
+```
 
 ### Utility Functions
 - **Comparator Functions**:
-  - `bool cmpBins(const Rectangle& a, const Rectangle& b)`: Comparator function to sort rectangles by height.
-  - `bool cmpBinsWid(const Rectangle& a, const Rectangle& b)`: Comparator function to sort rectangles by width.
-  - `bool cmpHeight(const Rectangle& a, const Rectangle& b)`: Comparator function to sort rectangles by height.
-  - `bool cmpWide(const Rectangle& a, const Rectangle& b)`: Comparator function to sort rectangles by width.
-  - `bool cmp(const Rectangle& a, const Rectangle& b)`: Comparator function to sort rectangles by width and height.
+  - `bool cmp(const Rectangle& a, const Rectangle& b)`: Comparator function to sort rectangles by width and then by height or vice versa.
 - **Timing Function**:
   - `void testTime(vector<Rectangle>& rects)`: Function to test the execution time of different algorithms.
 
@@ -214,17 +289,20 @@ By the end of this project, the developed algorithm and the accompanying analysi
 
 ​	We tested and evaluated each algorithm under random conditions and extreme cases, including scenarios with all wide rectangles, all narrow rectangles, all squares, and so on. The performance of each algorithm varies in different situations, which perhaps is the charm of approximation algorithms.
 
-<div style="text-align: center;"> <img src="https://s2.loli.net/2024/05/21/SGn4EqmlYcI3t9R.jpg" alt="d5c312f06e2b25547728daf86885c4d" width="33%" style="margin: 0 auto;border-radius: 15px;"> <img src="https://s2.loli.net/2024/05/21/HBledkwJc2CSNgp.jpg" alt="d049aa7127f3c6a584572f2d2048dc0" width="33%" style="margin: 0 auto;border-radius: 15px;"></div>
+<div style="text-align: center;"> <img src="https://s2.loli.net/2024/05/21/SGn4EqmlYcI3t9R.jpg" alt="d5c312f06e2b25547728daf86885c4d" width="33%" style="margin: 0 auto;border-radius: 15px;"> 
 
+The FFDH algorithms perform the best, maintaining low and less fluctuating approximation ratios. The NFDH and SAS_advanced performs good and stable. Sleator and SP are Stable, yet a little inferior to those above. SAS, no wonder performs poorly with increasing given width.
 
+<div style="text-align: center;"> <img src="https://s2.loli.net/2024/05/21/HBledkwJc2CSNgp.jpg" alt="d5c312f06e2b25547728daf86885c4d" width="33%" style="margin: 0 auto;border-radius: 15px;">
+
+The FFDH algorithms perform the best, maintaining low and less fluctuating approximation ratios. The NFDH and SAS_advanced performs good and stable. Sleator and SP are Stable, yet a little inferior to those above. SAS, no wonder performs poorly in common cases.
 
 <div style="text-align: center;"> <img src="https://s2.loli.net/2024/05/21/dSmtBgKqlO3IWDe.jpg" alt="d5c312f06e2b25547728daf86885c4d" width="33%" style="margin: 0 auto;border-radius: 15px;"> <img src="https://s2.loli.net/2024/05/21/KiImB76lptErJXH.jpg" alt="d049aa7127f3c6a584572f2d2048dc0" width="10%" style="margin: 0 auto;border-radius: 15px;"></div>
-
-
-
 <div style="text-align: center;"> <img src="https://s2.loli.net/2024/05/21/pDvRmbsxSBV6n5u.jpg" alt="d5c312f06e2b25547728daf86885c4d" width="33%" style="margin: 0 auto;border-radius: 15px;"> <img src="https://s2.loli.net/2024/05/21/KiImB76lptErJXH.jpg" alt="d049aa7127f3c6a584572f2d2048dc0" width="10%" style="margin: 0 auto;border-radius: 15px;"></div>
 
-
+When all the rectangles are in the same shape, **SAS_advanced is very close to NFDH**, simply stacking one rectangle after another.
+When it comes to All **Narrow** Rectangles, SP performs poorly, 
+wasting a lot spaces, we suppose it comes from the order of decreasing width instead of height.
 
 ## Chapter4: Analysis and Comments
 
@@ -324,3 +402,11 @@ $SP(I) ≤ 2 OPT(I) + hmax ≤ 3 OPT(I) $
   - SP: $O(n)$
 - **Space Complexity**:
   - All algorithms have a space complexity of $O(n)$, as they primarily use linear space to store rectangles and auxiliary data structures.
+
+As the width factor increases, FFDH, NFDH, Sleator, SP and SAS_ad performances are largely unaffected. SAS show a greater sensitivity to changes in width.
+
+FFDH is the most stable algorithm, and when it comes to All Narrow Cases, SP performs poorly. SAS_ad is close to NFDH when all rectangles are the same shape.
+
+NFDH and FFDH algorithm provide excellent approximate raito and simple implement. NFDH and Sleator provide excellent efficiency. 
+
+In conclusion, the choice of algorithm depends on the specific requirements of the application, such as the distribution of texture dimensions, the width-to-height ratio, and the overall size of the texture set. Each algorithm has its strengths and weaknesses, and the selection should be based on the specific constraints and objectives of the texture packing problem.
