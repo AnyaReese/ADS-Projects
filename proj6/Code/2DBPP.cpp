@@ -44,10 +44,11 @@ void ad_PackWide(vector<Rectangle>& narrow, vector<Rectangle>& wide, double x1, 
 void testTime(vector<Rectangle>& recs);
 
 bool cmpBins(const Rectangle& a, const Rectangle& b) {
-    return a.height > b.height;
-}
-bool cmpBinsWid(const Rectangle& a, const Rectangle& b) {
-    return a.width > b.width;
+    if (a.height != b.height) {
+        return a.height > b.height;
+    } else {
+        return a.width > b.width;
+    }
 }
 
 int main() {
@@ -265,14 +266,26 @@ double ad_SAS(vector<Rectangle>& recs) {
     }
 
     // Sort by height to prioritize taller rectangles first
-    auto cmpHeight = [](const Rectangle& a, const Rectangle& b) { return a.height > b.height; };
-    auto cmpWide = [](const Rectangle& a, const Rectangle& b) { return a.width > b.width; };
+    auto cmpHeight = [](const Rectangle& a, const Rectangle& b) {
+        if (a.height != b.height) {
+            return a.height > b.height;
+        } else {
+            return a.width > b.width;
+        }
+    };
+    auto cmpWide = [](const Rectangle& a, const Rectangle& b) {
+        if (a.width != b.width) {
+            return a.width > b.width;
+        } else {
+            return a.height > b.height;
+        }
+    };
     sort(narrow.begin(), narrow.end(), cmpHeight);
     sort(wide.begin(), wide.end(), cmpWide);
 
     double current_x = 0, current_y = 0;
 
-    bool init_with_wide = 0;
+    bool init_with_wide = false;
     double height_limit = 0;
     int count = 0;
     // Packing process
@@ -350,10 +363,6 @@ void ad_PackNarrow(vector<Rectangle>& narrow, vector<Rectangle>& wide, double x1
             curr_X1 += baseWidth;
             curr_Y1 = y1;
         }
-
-        double min_height = narrow.back().height;
-        double min_width = wide.back().width;
-
     }
 }
 
@@ -428,6 +437,13 @@ double SAS(vector<Rectangle>& recs) {
     vector<Rectangle> narrow;
     vector<Rectangle> wide;
 
+    for (auto& rec : recs) {
+        if (rec.width > given_width) {
+            cout << "\e[31m[ERROR]: The width of the rectangle is larger than the given width of the large bin.\e[0m" << endl;
+            return -1;
+        }
+    }
+
     if (enableLog) {
         cout << "\e[33m[Info]: Using SAS\e[0m" << endl;
     }
@@ -442,8 +458,21 @@ double SAS(vector<Rectangle>& recs) {
     }
 
     // Sort by height to prioritize taller rectangles first
-    auto cmpHeight = [](const Rectangle& a, const Rectangle& b) { return a.height > b.height; };
-    auto cmpWide = [](const Rectangle& a, const Rectangle& b) { return a.width > b.width; };
+    auto cmpHeight = [](const Rectangle& a, const Rectangle& b) {
+        if (a.height != b.height) {
+            return a.height > b.height;
+        } else {
+            return a.width > b.width;
+        }
+    };
+    auto cmpWide = [](const Rectangle& a, const Rectangle& b) {
+        if (a.width != b.width) {
+            return a.width > b.width;
+        } else {
+            return a.height > b.height;
+        }
+    };
+
     sort(narrow.begin(), narrow.end(), cmpHeight);
     sort(wide.begin(), wide.end(), cmpWide);
 
@@ -564,6 +593,10 @@ double Sleator(vector<Rectangle>& recs) {
 
     // Divide the rectangles into two groups based on their width
     for (const auto& rect : recs) {
+        if (rect.width > given_width) {
+            cout << "\e[31m[ERROR]: The width of the rectangle is larger than the given width of the large bin.\e[0m" << endl;
+            return -1;
+        }
         if (2 * rect.width > given_width) {
             groupA.push_back(rect);  // Group A: width is greater than half of the strip width
         } else {
@@ -631,6 +664,13 @@ double SP(vector<Rectangle>& recs) {
     double W = given_width; //
 
     sort(recs.begin(), recs.end(), cmp);
+
+    for (const auto& rec : recs) {
+        if (rec.width > W) {
+            cout << "\e[31m[ERROR]: The width of the rectangle is larger than the given width of the large bin.\e[0m" << endl;
+            return -1;
+        }
+    }
 
     vector<Strip> strips;
     strips.emplace_back(Strip{ W, W, 0, 0}); // Initialize the first strip
