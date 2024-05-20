@@ -3,7 +3,6 @@
 #include <vector>
 #include <algorithm>
 #include <iomanip>
-#define enableLog 0 // Enable log
 
 /**
  * Texture Packing is to pack multiple rectangle shaped textures into one large texture.
@@ -16,6 +15,7 @@
 
 using namespace std;
 
+int enableLog = 0; // Enable log
 /** Classes **/
 class Rectangle {
 public:
@@ -72,10 +72,11 @@ void testTime(vector<Rectangle>& rects) {
     // calculate time
     
     clock_t start_ad_SAS,end_ad_SAS,start_SAS, end_SAS, start_FFDH, end_FFDH, start_NFDH, end_NFDH, start_Sleator, end_Sleator, start_SP, end_SP;
-    
+
     start_SAS = clock();
     double height_SAS = SAS(rects);
     end_SAS = clock();
+
 
     start_ad_SAS = clock();
     double height_ad_SAS = ad_SAS(rects);
@@ -93,9 +94,11 @@ void testTime(vector<Rectangle>& rects) {
     double height_Sleator = Sleator(rects);
     end_Sleator = clock();
 
+    enableLog = 1;
     start_SP = clock();
     double heigh_SP = SP(rects);
     end_SP = clock();
+    enableLog = 0;
 
     cout << "The sum of area is:" << sumupArea << endl;
 
@@ -353,17 +356,22 @@ void ad_PackNarrow(vector<Rectangle>& narrow, vector<Rectangle>& wide, double x1
         while (!narrow.empty() && (curr_X1 + narrow[0].width <= x_limit)) {
             baseWidth = narrow[0].width;
             while (!narrow.empty() && (curr_Y1 + narrow[0].height <= y_limit) && (narrow[0].width <= baseWidth)) {
+                if (enableLog) {
+                    cout << "Packing narrow at (" << curr_X1 << ", " << curr_Y1 << ");" << narrow[0].width<<" , " <<narrow[0].height << endl;
+                }
                 curr_Y1 += narrow[0].height;
                 narrow.erase(narrow.begin());
-            }
-            if (enableLog) {
-                cout << "Packing narrow at (" << curr_X1 << ", " << curr_Y1 << ")" << endl;
             }
             
             curr_X1 += baseWidth;
             curr_Y1 = y1;
         }
     }
+    if (narrow.empty() && !wide.empty() && x_limit==given_width && wide[0].width + curr_X1 <= given_width){
+        if (enableLog) cout << "ad_PackWide at " << curr_X1 <<"  "<< y1<<"  "<< x_limit <<"  "<<y_limit<< endl;
+        ad_PackWide(narrow, wide, curr_X1, y1, x_limit , y_limit);
+    }
+    return;
 }
 
 /**
@@ -380,11 +388,9 @@ void ad_PackWide(vector<Rectangle>& narrow, vector<Rectangle>& wide, double x1, 
     int flag = 1;
     if (!wide.empty() && (x1 + wide[0].width <= x_limit)) {
         for (int i = 0; i < wide.size(); i++) { // traverse each wide
-        
             // 放置宽矩形
             if (y1 + wide[i].height <= y_limit) {
-
-                if (flag){
+                if (flag && y1 == pre_Y1){
                     first_width += wide[i].width;
                     flag = 0;
                 }
@@ -393,7 +399,7 @@ void ad_PackWide(vector<Rectangle>& narrow, vector<Rectangle>& wide, double x1, 
                     ad_PackNarrow(narrow, wide, x1 + wide[i].width, y1, x_limit, y_limit);
                 }
                 if (enableLog) {
-                    cout << "Packing wide at (" << x1 << ", " << y1 << ")" << endl;
+                    cout << "Packing wide at (" << x1 << ", " << y1 << ");" << wide[i].width<<" , " <<wide[i].height << endl;
                 }
                 x_limit = x1 + wide[i].width;
                 y1 += wide[i].height;
@@ -407,17 +413,17 @@ void ad_PackWide(vector<Rectangle>& narrow, vector<Rectangle>& wide, double x1, 
     //     ad_PackNarrow(narrow, wide, x1, y1, x_limit, y_limit);
     // }
 
-    cout << "ad_PackWide " << first_width <<"  "<< pre_Y1<<"  "<< pre_x_limit <<"  "<<y_limit<<" "<< wide.empty()<<endl;
+    // cout << "ad_PackWide " << first_width <<"  "<< pre_Y1<<"  "<< pre_x_limit <<"  "<<y_limit<<" "<< wide.empty()<<endl;
     // 如果在右边的间隙中还能放得下宽矩形，就继续放宽矩形
     if((!wide.empty() && first_width + wide[0].width <= pre_x_limit)) {
-        double baseWidth = wide[0].width;
-        cout << "ad_PackWide at " << first_width <<"  "<< pre_Y1<<"  "<< pre_x_limit <<"  "<<y_limit<< endl;
+        if (enableLog) cout << "ad_PackWide at " << first_width <<"  "<< pre_Y1<<"  "<< pre_x_limit <<"  "<<y_limit<< endl;
         ad_PackWide(narrow, wide, first_width, pre_Y1, pre_x_limit , y_limit);
+        return;
     }
 
-    // 如果宽矩形没了但是右边还能放窄矩形，就继续放窄矩形
-    if (!narrow.empty() && first_width + narrow[0].width < pre_x_limit) {
-        cout << "ad_PackNarrow at " << first_width <<"  "<< pre_Y1<<"  "<< pre_x_limit <<"  "<<y_limit<< endl;
+    // 如果宽矩形没了或者放不下，但是右边还能放窄矩形，就继续放窄矩形
+    if (!narrow.empty()) {
+        if (enableLog) cout << "ad_PackNarrow at " << first_width <<"  "<< pre_Y1<<"  "<< pre_x_limit <<"  "<<y_limit<< endl;
         ad_PackNarrow(narrow, wide, first_width, pre_Y1, pre_x_limit, y_limit );
     }
      
@@ -687,7 +693,7 @@ double SP(vector<Rectangle>& recs) {
                 if (!s_index) {
                     s_index = j;
                 } else if (strips[j].width < strips[s_index].width) {
-                    s_index = j; // Find the strip with the lowest upper bound
+                    s_index = j; // Find the strip with the minist width
                 }
             }
         } /* Traverse Strip End */
@@ -712,7 +718,7 @@ double SP(vector<Rectangle>& recs) {
             Strip s2 = {
                     recs[i].width,
                     strips[s_index].width - recs[i].width,
-                    strips[s_index].upper,
+                    strips[s_index].lower,
                     strips[s_index].lower + recs[i].height
             };
 
