@@ -18,7 +18,7 @@ body, pre {
 
 ### 1.1 Background
 
-​	Texture packing is a critical problem in the field of computer graphics, where the goal is to efficiently pack multiple rectangle-shaped textures into a single large texture. 
+​	Texture packing is a critical problem in the field of computer graphics, where the goal is to efficiently pack multiple rectangle-shaped textures into a single large texture. This process is essential in various applications, including video game development, 3D rendering, and image processing, where minimizing the texture memory usage and optimizing rendering performance are crucial.
 
 ​	The primary objective of texture packing is to arrange the given textures within a large texture of specified width while minimizing the height required. This is akin to a two-dimensional bin packing problem, which is known to be NP-hard. Hence, exact solutions are computationally infeasible for large instances, making approximation algorithms a practical choice.
 
@@ -43,18 +43,25 @@ body, pre {
 ##### 1. **Next Fit Decreasing Height (NFDH)**
 **Solution Approach:**
 
-- **Sorting**: Similar to FFDH, the rectangles are sorted in decreasing order of height.
+<img src="https://s2.loli.net/2024/05/21/RzgmAO97ZkqMcV5.png" alt="image-20240521005037004" style="zoom: 67%;" />
+
+- **Sorting**: The rectangles are first sorted in decreasing order of height. This ensures that taller rectangles are placed first, which helps in optimizing space usage vertically.
 - **Packing Strategy**: The algorithm places each rectangle into the current bin (row) if it fits. If the rectangle does not fit in the current bin, a new bin is created, and the rectangle is placed in this new bin.
 - **Advantages**: This approach reduces the complexity of checking multiple bins for space, as it only considers the current bin, making it faster but potentially less space-efficient than FFDH.
 
 ##### 2. **First Fit Decreasing Height (FFDH)**
+
+<img src="https://s2.loli.net/2024/05/21/hQckjGxXYDsuKR4.png" alt="image-20240521005056376" style="zoom:67%;" />
+
 **Solution Approach:**
 
-- **Sorting**: The rectangles are first sorted in decreasing order of height. This ensures that taller rectangles are placed first, which helps in optimizing space usage vertically.
+- **Sorting**: Similar to NFDH, the rectangles are sorted in decreasing order of height.
 - **Packing Strategy**: The algorithm iterates over the sorted list of rectangles, placing each rectangle into the first bin (row) that has enough remaining width to accommodate it. If no such bin exists, a new bin is created.
 - **Advantages**: This method is straightforward and efficient for minimizing the height of the packing by ensuring that the tallest rectangles are placed first, reducing the chance of creating excessively high bins later on.
 
 ##### 3. **Sleator**
+
+<img src="https://s2.loli.net/2024/05/21/sG7S8jIbDzcTMBN.png" alt="image-20240521005124175" style="zoom:67%;" />
 
 **Solution Approach:**
 
@@ -68,15 +75,20 @@ body, pre {
 
 **Solution Approach:**
 
+<img src="https://s2.loli.net/2024/05/21/LT1J4fWbwE9PSoA.png" alt="image-20240521005111899" style="zoom:67%;" />
+
 - **Sorting**: Rectangles are sorted by width and height to prioritize placing larger rectangles first.
 - **Packing Strategy**: The algorithm creates strips to accommodate rectangles, cutting strips into sub-strips as needed to fit the rectangles. This method allows for efficient use of space by creating flexible packing regions within the large bin.
 - **Advantages**: Split Packing can handle a diverse set of rectangle sizes and efficiently use the available space by dynamically adjusting strip sizes.
 
 ##### 5. Size Alternating Stack (SAS)
+
+<img src="https://s2.loli.net/2024/05/21/MqRGmsnAEoLYbWI.png" alt="image-20240521005204251" style="zoom:67%;" />
+
 **Solution Approach:**
 
 - **Partitioning**: Rectangles are divided into two categories: narrow (width < height) and wide (width >= height).
-- **Sorting**: Narrow rectangles are sorted by height, and wide rectangles are sorted by width. This prioritization helps in organizing the packing more efficiently.
+- **Sorting**: Narrow rectangles are sorted by height, and wide rectangles are sorted by width. If the width (or height) equals,then sort them by height(or width). This prioritization helps in organizing the packing more efficiently.
 - **Packing Strategy**: The packing process alternates between placing narrow and wide rectangles, starting with the taller rectangles first. This alternation helps in balancing the use of space and minimizing the height incrementally.
 - **Advantages**: By categorizing and sorting rectangles, SAS efficiently uses space and reduces the overall height required for packing, which performs well when the maximum width of the rectangles is close to the width of the container.
 
@@ -152,8 +164,8 @@ By the end of this project, the developed algorithm and the accompanying analysi
   - `bool cmpHeight(const Rectangle& a, const Rectangle& b)`: Comparator function to sort rectangles by height.
   - `bool cmpWide(const Rectangle& a, const Rectangle& b)`: Comparator function to sort rectangles by width.
   - `double ad_SAS(vector<Rectangle>& rects)`: Function to implement the adaptive SAS algorithm.
-  - `void ad_PackNarrow(vector<Rectangle>& narrow, vector<Rectangle>& wide, double x1, double y1, double x_limit, double y_limit)`: Adaptive helper function to pack narrow rectangles.
-  - `void ad_PackWide(vector<Rectangle>& narrow, vector<Rectangle>& wide, double x1, double y1, double x_limit, double y_limit)`: Adaptive helper function to pack wide rectangles.
+  - `void ad_PackNarrow(vector<Rectangle>& narrow, vector<Rectangle>& wide, double x1, double y1, double x_limit, double y_limit)`: Advanced helper function to pack narrow rectangles.
+  - `void ad_PackWide(vector<Rectangle>& narrow, vector<Rectangle>& wide, double x1, double y1, double x_limit, double y_limit)`: Advanced helper function to pack wide rectangles.
 
 #### 5. **Sleator**
 - **Data Structures**:
@@ -186,17 +198,31 @@ By the end of this project, the developed algorithm and the accompanying analysi
 - **Timing Function**:
   - `void testTime(vector<Rectangle>& rects)`: Function to test the execution time of different algorithms.
 
-
-
-
-
-
-
 ## Chapter3: Testing Results
 
+​	We specifically wrote a Python script to generate test cases and test programs, and we conducted testing and charting of the program as needed.
+
+### Running Time
+
+​	We analyzed the runtime of each algorithm under different data scales individually and organized the results into the following chart.
+
+<div style="text-align: center;"> <img src="https://s2.loli.net/2024/05/21/qoRpDdrtWZfIB51.jpg" alt="d5c312f06e2b25547728daf86885c4d" width="33%" style="margin: 0 auto;border-radius: 15px;"> <img src="https://s2.loli.net/2024/05/21/YzARiLKefa74yIh.jpg" alt="d049aa7127f3c6a584572f2d2048dc0" width="33%" style="margin: 0 auto;border-radius: 15px;"></div>
 
 
 
+### Approximation ratio
+
+​	We tested and evaluated each algorithm under random conditions and extreme cases, including scenarios with all wide rectangles, all narrow rectangles, all squares, and so on. The performance of each algorithm varies in different situations, which perhaps is the charm of approximation algorithms.
+
+<div style="text-align: center;"> <img src="https://s2.loli.net/2024/05/21/SGn4EqmlYcI3t9R.jpg" alt="d5c312f06e2b25547728daf86885c4d" width="33%" style="margin: 0 auto;border-radius: 15px;"> <img src="https://s2.loli.net/2024/05/21/HBledkwJc2CSNgp.jpg" alt="d049aa7127f3c6a584572f2d2048dc0" width="33%" style="margin: 0 auto;border-radius: 15px;"></div>
+
+
+
+<div style="text-align: center;"> <img src="https://s2.loli.net/2024/05/21/dSmtBgKqlO3IWDe.jpg" alt="d5c312f06e2b25547728daf86885c4d" width="33%" style="margin: 0 auto;border-radius: 15px;"> <img src="https://s2.loli.net/2024/05/21/KiImB76lptErJXH.jpg" alt="d049aa7127f3c6a584572f2d2048dc0" width="10%" style="margin: 0 auto;border-radius: 15px;"></div>
+
+
+
+<div style="text-align: center;"> <img src="https://s2.loli.net/2024/05/21/pDvRmbsxSBV6n5u.jpg" alt="d5c312f06e2b25547728daf86885c4d" width="33%" style="margin: 0 auto;border-radius: 15px;"> <img src="https://s2.loli.net/2024/05/21/KiImB76lptErJXH.jpg" alt="d049aa7127f3c6a584572f2d2048dc0" width="10%" style="margin: 0 auto;border-radius: 15px;"></div>
 
 
 
@@ -209,27 +235,44 @@ Here is the detailed analysis of the time and space complexity for each of the i
   - **Sorting**: Sorting the rectangles by height takes $O(n \log n)$.
   - **Packing**: In the worst case, each rectangle might be compared with all previous bins, resulting in $O(n^2)$ comparisons.
   - **Overall**: $O(n \log n) + O(n^2) = O(n^2)$.
+  
 - **Space Complexity**:
   - **Storage for Rectangles**: $O(n)$ to store the list of rectangles.
   - **Current Widths**: $O(n)$ for the array tracking the current width of each bin.
-  - **Overall**: $O(n)$.
+  - **Overall**: $O(n)$​.
+  
+- **Approximation ratio**:
+  - $FFDH(I) ≤ 1.7 OPT(I) + hmax ≤ 2.7 OPT(I)$​
+
 
 #### 2. **Next Fit Decreasing Height (NFDH)**
 - **Time Complexity**:
+  
   - **Sorting**: Sorting the rectangles by height takes $O(n \log n)$.
   - **Packing**: Each rectangle is only compared with the current bin, so packing takes $O(n)$.
   - **Overall**: $O(n \log n) + O(n) = O(n \log n)$.
+  
 - **Space Complexity**:
+  
   - **Storage for Rectangles**: $O(n)$.
   - **Current Widths**: $O(n)$ for the array tracking the current width of each bin.
-  - **Overall**: $O(n)$.
+  - **Overall**: $O(n)$​​.
+  
+- **Approximation ratio**:
+  
+  $\begin{aligned}
+  & \mathrm{NFDH}(I)=\sum_{\mathrm{i}=1}^{t}H_{i}\leq H_{1}+\frac{\sum_{i=1}^{t-1}S_{i}+\sum_{i=2}^{t}S_{i}}{W} \\
+  &\leq H_1+2\times\frac SW \\
+  &\leq h_{\max}+2OPT(I) \\
+  &\leq3OPT(I)
+  \end{aligned}$​
 
 #### 3. **Size Alternating Stack (SAS)**
 - **Time Complexity**:
   - **Partitioning**: Dividing rectangles into narrow and wide categories takes $O(n)$.
   - **Sorting**: Sorting narrow and wide rectangles takes $O(n \log n)$ each, totaling $O(n \log n)$.
-  - **Packing**: The packing process involves linear traversal of both narrow and wide rectangles, taking $O(n)$.
-  - **Overall**: $O(n \log n) + O(n) + O(n) = O(n \log n)$.
+  - **Packing**: The packing process involves traversal of wide rectangles taking $O(n^2)$,and choosing the narrow rectangles taking $O(1)$ .
+  - **Overall**: $O(n \log n) + O(n) + O(n^2)+ O(1) = O(n ^2)$.
 - **Space Complexity**:
   - **Storage for Rectangles**: $O(n)$.
   - **Narrow and Wide Lists**: $O(n)$ each, totaling $O(n)$.
@@ -239,8 +282,8 @@ Here is the detailed analysis of the time and space complexity for each of the i
 - **Time Complexity**:
   - **Partitioning**: Dividing rectangles into narrow and wide categories takes $O(n)$.
   - **Sorting**: Sorting narrow and wide rectangles takes $O(n \log n)$ each, totaling $O(n \log n)$.
-  - **Packing**: The packing process involves linear traversal of both narrow and wide rectangles, taking $O(n)$.
-  - **Overall**: $O(n \log n) + O(n) + O(n) = O(n \log n)$.
+  - **Packing**: The packing process involves traversal of wide rectangles taking $O(n^2)$,and choosing the narrow rectangles taking $O(1)$ .
+  - **Overall**: $O(n \log n) + O(n) + O(n) = O(n ^ 2)$.
 - **Space Complexity**:
   - **Storage for Rectangles**: $O(n)$.
   - **Narrow and Wide Lists**: $O(n)$ each, totaling $O(n)$.
@@ -256,24 +299,28 @@ Here is the detailed analysis of the time and space complexity for each of the i
   - **Storage for Rectangles**: $O(n)$.
   - **Groups A and B**: $O(n)$ each, totaling $O(n)$.
   - **Overall**: $O(n)$.
+- **Approximation ratio**:
+$Sleator(I) ≤ 1.5 OPT(I) + hmax ≤ 2.5 OPT(I)$
 
 #### 6. **Split Packing (SP)**
 - **Time Complexity**:
   - **Sorting**: Sorting rectangles by width and height takes $O(n \log n)$.
-  - **Packing**: The algorithm iterates over rectangles and strips, leading to $O(n^2)$ in the worst case due to splitting strips.
-  - **Overall**: $O(n \log n) + O(n^2) = O(n^2)$.
+  - **Packing**: The algorithm iterates over rectangles and strips, leading to $O(n)$ in the worst case due to splitting strips.
+  - **Overall**: $O(n \log n) + O(n) = O(n \log n)$.
 - **Space Complexity**:
   - **Storage for Rectangles**: $O(n)$.
   - **Strips**: In the worst case, each rectangle could create a new strip, resulting in $O(n)$.
   - **Overall**: $O(n)$.
+- **Approximation ratio**:
+$SP(I) ≤ 2 OPT(I) + hmax ≤ 3 OPT(I) $
 
 ### Summary
-- **Time Complexity**:
+- **Time Complexity (NOT considering sort)**:
   - FFDH: $O(n^2)$
-  - NFDH: $O(n \log n)$
-  - SAS: $O(n \log n)$
+  - NFDH: $O(n)$
+  - SAS: $O(n ^2)$
   - ad_SAS: $O(n^2)$
-  - Sleator: $O(n \log n)$
-  - SP: $O(n^2)$
+  - Sleator: $O(n)$
+  - SP: $O(n)$
 - **Space Complexity**:
   - All algorithms have a space complexity of $O(n)$, as they primarily use linear space to store rectangles and auxiliary data structures.
