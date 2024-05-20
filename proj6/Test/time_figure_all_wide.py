@@ -33,5 +33,5 @@ for times, name in zip(datasets, dataset_names):
 plt.title("Approximation ratio of All Wide Rectangles")
 plt.xlabel("Data Size")
 plt.ylabel("Approximation ratio")
-# plt.legend()
+plt.legend()
 plt.show()

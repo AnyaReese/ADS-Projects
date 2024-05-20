@@ -7,15 +7,15 @@ plt.rcParams['font.sans-serif'] = ['NSimSun']
 plt.rcParams['font.size'] = 18
 
 # Define the data sizes
-data_sizes = np.array([ 1000, 2000, 4000,  8000])
+data_sizes = np.array([ 100, 500, 2000, 5000, 10000])
 
 # Generate random running times for each dataset
-times_SAS_ad = np.array([1.202858,1.195894 ,1.195942 ,1.186722])  # Sample times for dataset 1
-times_SAS = np.array([2.911135,  3.314078,3.053483,2.964658])  # Sample times for dataset 2
-times_FFDH = np.array([  1.052668,  1.026570,1.031013,1.035820])  # Sample times for dataset 3
-times_NFDH = np.array([  1.189174,  1.179194,  1.172530, 1.171174])  # Sample times for dataset 4
-times_Sleator = np.array([1.292416, 1.281214,1.305048,1.308127])  # Sample times for dataset 5
-times_SP = np.array([1.289691,1.312049, 1.316831, 1.315857])  # Sample times for dataset 6
+times_SAS_ad = np.array([  1.254433, 1.275280,1.262933,1.267878,1.267134])  # Sample times for dataset 1
+times_SAS = np.array([      1.603611, 1.534873,1.513650,1.501400,1.491718])  # Sample times for dataset 2
+times_FFDH = np.array([     1.145568, 1.137057 ,1.124125,1.129400,1.128214])  # Sample times for dataset 3
+times_NFDH = np.array([      1.254433, 1.275420,1.262933 ,1.267878,1.267136])  # Sample times for dataset 4
+times_Sleator = np.array([   1.282155, 1.292547, 1.276720,1.280777,1.280124])  # Sample times for dataset 5
+times_SP = np.array([  1.270038, 1.292069, 1.278534,1.282278,1.281533])  # Sample times for dataset 6
 
 datasets = [times_SAS_ad, times_SAS, times_FFDH, times_NFDH, times_Sleator, times_SP]
 dataset_names = ["SAS_ad", "SAS", "FFDH", "NFDH", "Sleator", "SP"]
@@ -30,8 +30,8 @@ for times, name in zip(datasets, dataset_names):
     # Plot the data
     plt.plot(xnew, y_smooth, label=name)
 
-plt.title("Approximation ratio of All Wide Rectangles")
+plt.title("Approximation ratio of All Square Rectangles")
 plt.xlabel("Data Size")
 plt.ylabel("Approximation ratio")
-# plt.legend()
+plt.legend()
 plt.show()
