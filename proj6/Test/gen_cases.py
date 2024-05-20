@@ -1,29 +1,29 @@
 import random
 
 def common_case():
-    max_rectangles = 20
+    max_rectangles = 200
     max_height = 100
     # 确保给定的容器宽度足够大，可以容纳至少一个矩形
-    given_width = random.randint(50, 100)
+    given_width = random.randint(500, 600)
 
-    n = random.randint(10, max_rectangles)
+    n = random.randint(100, max_rectangles)
 
     with open('common_rec_20.txt', 'w') as file:
         file.write(f"{n} {given_width}\n")
         for _ in range(n):
             # 保证每个矩形的宽度不超过给定的宽度
-            width = random.randint(1, given_width)
-            height = random.randint(1, max_height)
+            width = random.randint(10, (int)(given_width/6))
+            height = random.randint(10, max_height)
             file.write(f"{width} {height}\n")
 
     print("Generate common_case done!")
 
 
 def square_case():
-    max_rectangles = 20
-    max_height = 100
+    max_rectangles = 200
+    max_height = 1000
     # 确保给定的容器宽度足够大，可以容纳至少一个矩形
-    given_width = random.randint(50, 100)
+    given_width = random.randint(500, 1000)
 
     n = random.randint(10, max_rectangles)
 
@@ -40,11 +40,11 @@ def square_case():
 
 def large_case():
     max_rectangles = 10000
-    max_height = 100
+    max_height = 1000
     # 确保给定的容器宽度足够大，可以容纳至少一个矩形
-    given_width = random.randint(50, 100)
+    given_width = random.randint(500, 1000)
 
-    n = random.randint(100, max_rectangles)
+    n = random.randint(1000, max_rectangles)
 
     with open('large_rec_100.txt', 'w') as file:
         file.write(f"{n} {given_width}\n")
@@ -57,18 +57,18 @@ def large_case():
     print("Generate large_case done!")
 
 def all_narrow_case():
-    max_rectangles = 20
-    max_height = 100
+    max_rectangles = 200
+    max_height = 1000
     # 确保给定的容器宽度足够大，可以容纳至少一个矩形
-    given_width = random.randint(50, 100)
+    given_width = random.randint(50, 1000)
 
-    n = random.randint(10, max_rectangles)
+    n = random.randint(100, max_rectangles)
 
     with open('all_narrow_rec_20.txt', 'w') as file:
         file.write(f"{n} {given_width}\n")
         for _ in range(n):
             # 保证每个矩形的宽度不超过给定的宽度
-            width = random.randint(1, 5)
+            width = random.randint(10, 50)
             height = random.randint(width, max_height)
             file.write(f"{width} {height}\n")
     
@@ -76,10 +76,10 @@ def all_narrow_case():
 
 
 def all_wide_case():
-    max_rectangles = 20
-    max_height = 100
+    max_rectangles = 200
+    max_height = 1000
     # 确保给定的容器宽度足够大，可以容纳至少一个矩形
-    given_width = random.randint(50, 100)
+    given_width = random.randint(300, 600)
 
     n = random.randint(10, max_rectangles)
 
@@ -87,8 +87,8 @@ def all_wide_case():
         file.write(f"{n} {given_width}\n")
         for _ in range(n):
             # 保证每个矩形的宽度不超过给定的宽度
-            height = random.randint(1, 10)
-            width = random.randint(height, given_width)
+            height = random.randint(1, 100)
+            width = random.randint(height, (int)(given_width/3))
             file.write(f"{width} {height}\n")
 
     print("Generate all_wide_case done!")

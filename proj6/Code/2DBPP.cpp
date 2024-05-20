@@ -28,6 +28,7 @@ public:
 /** Global Variables **/
 int n = 0;  // Input total number of bins
 double given_width = 0; // Input width of the large bin
+long long sumupArea=0; 
 
 /** Functions **/
 double SP(vector<Rectangle>& recs);
@@ -58,6 +59,7 @@ int main() {
     for (int i = 0; i < n; i++) {
         Rectangle rectangle = {};
         cin >> rectangle.width >> rectangle.height;
+        sumupArea+=rectangle.height*rectangle.width;
         rects.push_back(rectangle);
     }
 
@@ -67,6 +69,7 @@ int main() {
 
 void testTime(vector<Rectangle>& rects) {
     // calculate time
+    
     clock_t start_ad_SAS,end_ad_SAS,start_SAS, end_SAS, start_FFDH, end_FFDH, start_NFDH, end_NFDH, start_Sleator, end_Sleator, start_SP, end_SP;
     
     start_SAS = clock();
@@ -92,28 +95,25 @@ void testTime(vector<Rectangle>& rects) {
     start_SP = clock();
     double heigh_SP = SP(rects);
     end_SP = clock();
-    cout << "Height of the packing obtained in the strip using improved SAS: " << height_ad_SAS ;
-    cout << fixed << setprecision(6);
+
+    cout << "The sum of area is:" << sumupArea << endl;
+
+    cout << "Height of the packing obtained in the strip using improved SAS: " << height_ad_SAS << fixed << setprecision(6) << " with a ratio of: " << (double)(height_ad_SAS * given_width) / (sumupArea);
     cout << ", takes " << (double)(end_ad_SAS - start_ad_SAS) / CLOCKS_PER_SEC << " seconds" << endl;
     cout << fixed << setprecision(0);
-    cout << "Height of the packing obtained in the strip using SAS: " << height_SAS ;
-    cout << fixed << setprecision(6);
+    cout << "Height of the packing obtained in the strip using SAS: " << height_SAS << fixed << setprecision(6) << " with a ratio of: " << (double)(height_SAS * given_width) / (sumupArea);
     cout << ", takes " << (double)(end_SAS - start_SAS) / CLOCKS_PER_SEC << " seconds" << endl;
     cout << fixed << setprecision(0);
-    cout << "Height of the packing obtained in the strip using FFDH: " << height_FFDH ;
-    cout << fixed << setprecision(6);
+    cout << "Height of the packing obtained in the strip using FFDH: " << height_FFDH << fixed << setprecision(6) << " with a ratio of: " << (double)(height_FFDH * given_width) / (sumupArea);
     cout << ", takes " << (double)(end_FFDH - start_FFDH) / CLOCKS_PER_SEC << " seconds" << endl;
     cout << fixed << setprecision(0);
-    cout << "Height of the packing obtained in the strip using NFDH: " << height_NFDH ;
-    cout << fixed << setprecision(6);
+    cout << "Height of the packing obtained in the strip using NFDH: " << height_NFDH << fixed << setprecision(6) << " with a ratio of: " << (double)(height_NFDH * given_width) / (sumupArea);
     cout << ", takes " << (double)(end_NFDH - start_NFDH) / CLOCKS_PER_SEC << " seconds" << endl;
     cout << fixed << setprecision(0);
-    cout << "Height of the packing obtained in the strip using Sleator: " << height_Sleator;
-    cout << fixed << setprecision(6);
+    cout << "Height of the packing obtained in the strip using Sleator: " << height_Sleator << fixed << setprecision(6) << " with a ratio of: " << (double)(height_Sleator * given_width) / (sumupArea);
     cout << ", takes " << (double)(end_Sleator - start_Sleator) / CLOCKS_PER_SEC << " seconds" << endl;
     cout << fixed << setprecision(0);
-    cout << "Height of the packing obtained in the strip using SP: " << heigh_SP ;
-    cout << fixed << setprecision(6);
+    cout << "Height of the packing obtained in the strip using SP: " << heigh_SP << fixed << setprecision(6) << " with a ratio of: " << (double)(heigh_SP * given_width) / (sumupArea);
     cout << ", takes " << (double)(end_SP - start_SP) / CLOCKS_PER_SEC << " seconds" << endl;
 }
 
@@ -365,7 +365,7 @@ void ad_PackNarrow(vector<Rectangle>& narrow, vector<Rectangle>& wide, double x1
  */
 
 void ad_PackWide(vector<Rectangle>& narrow, vector<Rectangle>& wide, double x1, double y1, double x_limit, double y_limit) {
-    double current_X1 = x1;
+    double first_width = x1;
     double pre_Y1 = y1;
     double pre_x_limit = x_limit; // 保存刚开始 PackWide 的 y1
     int flag = 1;
@@ -375,8 +375,8 @@ void ad_PackWide(vector<Rectangle>& narrow, vector<Rectangle>& wide, double x1, 
             // 放置宽矩形
             if (y1 + wide[i].height <= y_limit) {
 
-                if(flag){
-                    current_X1 += wide[i].width;
+                if (flag){
+                    first_width += wide[i].width;
                     flag = 0;
                 }
                 // 在形成的间隙中放入窄矩形
@@ -394,23 +394,22 @@ void ad_PackWide(vector<Rectangle>& narrow, vector<Rectangle>& wide, double x1, 
         }
     }
 
-    if (wide.empty() && !narrow.empty()) { // 如果宽矩形放完了，就直接放窄矩形
-        ad_PackNarrow(narrow, wide, x1, y1, x_limit, y_limit);
-    }
+    // if (wide.empty() && !narrow.empty()) { // 如果宽矩形放完了，就直接放窄矩形
+    //     ad_PackNarrow(narrow, wide, x1, y1, x_limit, y_limit);
+    // }
 
+    cout << "ad_PackWide " << first_width <<"  "<< pre_Y1<<"  "<< pre_x_limit <<"  "<<y_limit<<" "<< wide.empty()<<endl;
     // 如果在右边的间隙中还能放得下宽矩形，就继续放宽矩形
-    if((!wide.empty() && current_X1 + wide[0].width <= pre_x_limit )) {
+    if((!wide.empty() && first_width + wide[0].width <= pre_x_limit)) {
         double baseWidth = wide[0].width;
-        wide.erase(wide.begin());
-        cout << "ad_PackWide at " << current_X1 <<"  "<< pre_Y1<<"  "<< pre_x_limit <<"  "<<y_limit<< endl;
-        
-        ad_PackWide(narrow, wide, current_X1, pre_Y1, pre_x_limit , y_limit);
+        cout << "ad_PackWide at " << first_width <<"  "<< pre_Y1<<"  "<< pre_x_limit <<"  "<<y_limit<< endl;
+        ad_PackWide(narrow, wide, first_width, pre_Y1, pre_x_limit , y_limit);
     }
 
     // 如果宽矩形没了但是右边还能放窄矩形，就继续放窄矩形
-    if (!narrow.empty() && current_X1 + narrow[0].width < pre_x_limit) {
-        cout << "ad_PackNarrow at " << current_X1 <<"  "<< pre_Y1<<"  "<< pre_x_limit <<"  "<<y_limit<< endl;
-        ad_PackNarrow(narrow, wide, current_X1, pre_Y1, pre_x_limit, y_limit );
+    if (!narrow.empty() && first_width + narrow[0].width < pre_x_limit) {
+        cout << "ad_PackNarrow at " << first_width <<"  "<< pre_Y1<<"  "<< pre_x_limit <<"  "<<y_limit<< endl;
+        ad_PackNarrow(narrow, wide, first_width, pre_Y1, pre_x_limit, y_limit );
     }
      
 

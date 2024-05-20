@@ -27,6 +27,7 @@ $(BUILDDIR)/%.o: $(SRCDIR)/%.cpp
 # Clean up
 clean:
 	rm -f $(BUILDDIR)/*.o $(TARGET)
+	@echo "clean finished!"
 
 test:
 	@echo "Generating test cases..."
