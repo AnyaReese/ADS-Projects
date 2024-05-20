@@ -633,7 +633,8 @@ double SP(vector<Rectangle>& recs) {
     sort(recs.begin(), recs.end(), cmp);
 
     vector<Strip> strips;
-    strips.emplace_back(Strip{ 0, W, 0, 0}); // Initialize the first strip
+    strips.emplace_back(Strip{ W, W, 0, 0}); // Initialize the first strip
+    strips.emplace_back(Strip{ W, W, 0, 0});
 
     int strip_num = 1;
 
@@ -642,10 +643,10 @@ double SP(vector<Rectangle>& recs) {
         int s_index = 0; // Find the first strip that can accommodate the rectangle
 
         for (int j = 1; j <= strip_num; j++) { // Traverse each strip
-            if (strips[j-1].width - strips[j-1].itemWidth >= recs[i].width) { // Check if the strip can accommodate the rectangle
+            if (strips[j].width - strips[j].itemWidth >= recs[i].width) { // Check if the strip can accommodate the rectangle
                 if (!s_index) {
                     s_index = j;
-                } else if (strips[j-1].width < strips[s_index-1].width) {
+                } else if (strips[j].width < strips[s_index].width) {
                     s_index = j; // Find the strip with the lowest upper bound
                 }
             }
@@ -654,30 +655,31 @@ double SP(vector<Rectangle>& recs) {
         if (!s_index) { // No suitable strip found
             // Find the lowest upper bound
             for (int j = 1; j <= strip_num; j++) {
-                if (!s_index || (strips[s_index-1].upper < strips[j - 1].upper && strips[j].width >= recs[i].width)) s_index = j;
+                if (!s_index || (strips[s_index].upper > strips[j].upper)) s_index = j;
             }
-            strips[s_index - 1].upper += recs[i].height;
-            strips[s_index - 1].itemWidth = recs[i].width;
+            strips[s_index].lower = strips[s_index].upper;
+            strips[s_index].upper += recs[i].height;
+            strips[s_index].itemWidth = recs[i].width;
         } else {
             // Suitable strip found, place the item
             Strip s1 = { // itemWidth, width, lower, upper
-                    recs[i].width,
-                    recs[i].width,
-                    strips[s_index - 1].upper,
-                    strips[s_index - 1].lower + recs[i].height
+                    strips[s_index].itemWidth,
+                    strips[s_index].itemWidth,
+                    strips[s_index].upper,
+                    strips[s_index].upper
             };
 
             Strip s2 = {
-                    0,
-                    strips[s_index - 1].width - recs[i].width,
-                    strips[s_index - 1].upper,
-                    strips[s_index - 1].upper
+                    recs[i].width,
+                    strips[s_index].width - recs[i].width,
+                    strips[s_index].upper,
+                    strips[s_index].lower + recs[i].height
             };
 
             // Cut the strip into two substrips
-            strips.erase(strips.begin() + s_index - 1);
-            strips.push_back(s1);
-            strips.push_back(s2);
+            strips.erase(strips.begin() + s_index);
+            strips.insert(strips.begin() + s_index, s1);
+            strips.insert(strips.begin() + s_index, s2);
             strip_num++;
         }
     } /* Traverse Rectangle end */
